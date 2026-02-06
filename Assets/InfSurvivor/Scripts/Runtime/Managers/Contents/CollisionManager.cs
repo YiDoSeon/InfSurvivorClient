@@ -14,16 +14,6 @@ namespace InfSurvivor.Runtime.Manager
         {
             this.gridVisualizer = gridVisualizer;
         }
-
-        public void AddToCells(HashSet<Vector2Int> coords, GameObject go)
-        {
-            gridVisualizer.AddToCells(coords, go);
-        }
-
-        public void RemoveFromCells(HashSet<Vector2Int> coords, GameObject go)
-        {
-            gridVisualizer.RemoveFromCells(coords, go);
-        }
         
         public void UpdateOccupiedCells(GameObject go, HashSet<Vector2Int> occupiedCells, Vector2 offset, Vector2 size)
         {
@@ -35,7 +25,7 @@ namespace InfSurvivor.Runtime.Manager
             Vector2Int minGridPos = minWorldPos.ToGridPos(CellSize);
             Vector2Int maxGridPos = maxWorldPos.ToGridPos(CellSize);
 
-            RemoveFromCells(occupiedCells, go);
+            gridVisualizer.RemoveFromCells(occupiedCells, go);
             occupiedCells.Clear();
 
             for (int x = minGridPos.x; x <= maxGridPos.x; x++)
@@ -47,12 +37,7 @@ namespace InfSurvivor.Runtime.Manager
                 }
             }
 
-            AddToCells(occupiedCells, go);
-        }
-
-        public void UpdatePosition(Vector2Int oldPos, Vector2Int newPos, GameObject go)
-        {
-            gridVisualizer.UpdatePosition(oldPos, newPos, go);
+            gridVisualizer.AddToCells(occupiedCells, go);
         }
     }
 }

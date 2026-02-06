@@ -58,25 +58,6 @@ namespace InfSurvivor.Runtime.System
             }
         }
 
-        public void UpdatePosition(Vector2Int oldPos, Vector2Int newPos, GameObject go)
-        {
-            if (gridData.TryGetValue(oldPos, out HashSet<GameObject> oldSet))
-            {
-                oldSet.Remove(go);
-                if (oldSet.Count == 0)
-                {
-                    gridData.Remove(oldPos);
-                }
-            }
-
-            if (gridData.TryGetValue(newPos, out HashSet<GameObject> newSet) == false)
-            {
-                newSet = new HashSet<GameObject>();
-                gridData[newPos] = newSet;
-            }
-            newSet.Add(go);
-        }
-
         private void OnDrawGizmos()
         {
             if (Application.isPlaying == false)
