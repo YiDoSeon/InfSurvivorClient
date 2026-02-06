@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -32,7 +31,6 @@ public class PlayerController : MonoBehaviour
         fireAction.performed += OnFire;
         fireAction.canceled += OnFire;
         fireAction.Enable();
-        Debug.Log(moveAction.id);
     }
 
     private void OnFire(InputAction.CallbackContext context)
