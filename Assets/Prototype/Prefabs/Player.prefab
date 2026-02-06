@@ -335,6 +335,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21612a2be96bc9648b0afce4af9a6eee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Prototype::PlayerController
+  animators:
+  - {fileID: 6323616739901478147}
+  - {fileID: 4995005397864338013}
+  - {fileID: 5453232512306356255}
+  spriteRenderers:
+  - {fileID: 6323616739901478144}
+  - {fileID: 3092507948775023557}
+  - {fileID: 3118832638951615860}
 --- !u!1 &7976363179729575625
 GameObject:
   m_ObjectHideFlags: 0
@@ -437,7 +445,7 @@ Animator:
   m_GameObject: {fileID: 7976363179729575625}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: c8a0997c0b21df5458c268b0ade535b2, type: 2}
+  m_Controller: {fileID: 22100000, guid: 169db12e4dd8bf54b98d38ac4957eb0c, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

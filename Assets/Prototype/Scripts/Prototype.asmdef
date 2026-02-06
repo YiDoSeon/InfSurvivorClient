@@ -2,7 +2,8 @@
     "name": "Prototype",
     "rootNamespace": "",
     "references": [
-        "GUID:75469ad4d38634e559750d17036d5f7c"
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:b709fc1bdeca9884ea165cd2f1610d41"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

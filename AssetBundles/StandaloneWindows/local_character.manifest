@@ -1,0 +1,45 @@
+ManifestFileVersion: 0
+UnityVersion: 6000.3.6f1
+CRC: 1697177841
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 3d77a741b923100ddb3a9a9b0f5bd3c6
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c37a30aa858767b088e04e6bf2c43370
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 46b5274e546caa5e581bb329351a5a34
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 21612a2be96bc9648b0afce4af9a6eee, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 212
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 221
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Prototype/Prefabs/Player.prefab
+Dependencies: []
