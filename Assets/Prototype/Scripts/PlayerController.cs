@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using InfSurvivor.Runtime.Managers;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,6 +19,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log(Managers.Collision.gameObject.name);
     }
 
     private void Start()
