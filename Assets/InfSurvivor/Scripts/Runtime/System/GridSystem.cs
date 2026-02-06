@@ -10,15 +10,8 @@ namespace InfSurvivor.Runtime.System
         [SerializeField] private float cellSize = 1.0f; // 한 칸의 크기
         [SerializeField] private Vector3 origin;
         public Color gridColor = Color.yellow;
-
         public float CellSize => cellSize;
         private Dictionary<Vector2Int, HashSet<GameObject>> gridData = new Dictionary<Vector2Int, HashSet<GameObject>>();
-        public static readonly Vector2Int[] Direction9 =
-        {
-            new Vector2Int(-1, 1),  new Vector2Int(0, 1),  new Vector2Int(1, 1),
-            new Vector2Int(-1, 0),  new Vector2Int(0, 0),  new Vector2Int(1, 0),
-            new Vector2Int(-1, -1), new Vector2Int(0, -1), new Vector2Int(1, -1),
-        };
 
         private void Awake()
         {
