@@ -6,20 +6,30 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    private readonly int ANIM_PARAM_MOVE_X = Animator.StringToHash("MoveX");
-    private readonly int ANIM_PARAM_MOVE_Y = Animator.StringToHash("MoveY");
-    private readonly int ANIM_PARAM_SPEED = Animator.StringToHash("Speed");
-    private readonly int ANIM_PARAM_SWORD_ATTACKING = Animator.StringToHash("SwordAttacking");
-    private readonly int ANIM_PARAM_SWORD_ATTACK = Animator.StringToHash("SwordAttack");
+    #region 애니메이션 파라미터 (hash)
+    private readonly int ANIM_FLOAT_MOVE_X = Animator.StringToHash("MoveX");
+    private readonly int ANIM_FLOAT_MOVE_Y = Animator.StringToHash("MoveY");
+    private readonly int ANIM_FLOAT_SPEED = Animator.StringToHash("Speed");
+    private readonly int ANIM_BOOL_SWORD_ATTACKING = Animator.StringToHash("SwordAttacking");
+    private readonly int ANIM_TRIGGER_SWORD_ATTACK = Animator.StringToHash("SwordAttack");
+    #endregion
+
+    #region SerializeField
+    [Header("Component")]
     [SerializeField] private List<Animator> animators;
     [SerializeField] private List<SpriteRenderer> spriteRenderers;
+
+    [Header("Settings")]
+    [SerializeField] private Vector2 collisionOffset;
+    [SerializeField] private Vector2 collisionSize;
+    #endregion
     private Vector2 moveInput;
     private Vector2 lastMoveDir = Vector2.down;
     private bool firePressed;
+    private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
 
     private void Awake()
     {
-        Debug.Log(Managers.Collision.gameObject.name);
     }
 
     private void Start()
@@ -40,9 +50,9 @@ public class PlayerController : MonoBehaviour
         firePressed = context.ReadValue<float>() > 0f;
         if (firePressed)
         {
-            AnimationSetTrigger(ANIM_PARAM_SWORD_ATTACK);
+            AnimationSetTrigger(ANIM_TRIGGER_SWORD_ATTACK);
         }
-        AnimationSetBool(ANIM_PARAM_SWORD_ATTACKING, firePressed);
+        AnimationSetBool(ANIM_BOOL_SWORD_ATTACKING, firePressed);
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -62,10 +72,17 @@ public class PlayerController : MonoBehaviour
 
         if (firePressed == false)
         {
-            
-            AnimationSetFloat(ANIM_PARAM_SPEED, input.sqrMagnitude);
+
+            AnimationSetFloat(ANIM_FLOAT_SPEED, input.sqrMagnitude);
             transform.position += (Vector3)input * 5f * Time.deltaTime;
         }
+
+        UpdateOccupiedCells();
+    }
+
+    private void UpdateOccupiedCells()
+    {
+        Managers.Collision.UpdateOccupiedCells(gameObject, occupiedCells, collisionOffset, collisionSize);
     }
 
     private void ApplyFacingDirection(Vector2 dir)
@@ -75,13 +92,13 @@ public class PlayerController : MonoBehaviour
 
         if (absX >= absY)
         {
-            AnimationSetFloat(ANIM_PARAM_MOVE_X, 1f);
-            AnimationSetFloat(ANIM_PARAM_MOVE_Y, 0f);
+            AnimationSetFloat(ANIM_FLOAT_MOVE_X, 1f);
+            AnimationSetFloat(ANIM_FLOAT_MOVE_Y, 0f);
         }
         else
         {
-            AnimationSetFloat(ANIM_PARAM_MOVE_X, 0f);
-            AnimationSetFloat(ANIM_PARAM_MOVE_Y, Mathf.Sign(dir.y));
+            AnimationSetFloat(ANIM_FLOAT_MOVE_X, 0f);
+            AnimationSetFloat(ANIM_FLOAT_MOVE_Y, Mathf.Sign(dir.y));
         }
 
         if (dir.x != 0)
@@ -115,7 +132,11 @@ public class PlayerController : MonoBehaviour
     private void SetFlip(bool right)
     {
         spriteRenderers.ForEach(sp => sp.flipX = right);
-    }        
+    }
     #endregion
 
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.DrawWireCube((Vector3)collisionOffset + transform.position, new Vector3(collisionSize.x, collisionSize.y));
+    }
 }
