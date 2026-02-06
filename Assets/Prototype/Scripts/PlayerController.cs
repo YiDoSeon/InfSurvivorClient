@@ -40,9 +40,9 @@ public class PlayerController : MonoBehaviour
         firePressed = context.ReadValue<float>() > 0f;
         if (firePressed)
         {
-            animators.ForEach(anim => anim.SetTrigger(ANIM_PARAM_SWORD_ATTACK));
+            AnimationSetTrigger(ANIM_PARAM_SWORD_ATTACK);
         }
-        animators.ForEach(anim => anim.SetBool(ANIM_PARAM_SWORD_ATTACKING, firePressed));
+        AnimationSetBool(ANIM_PARAM_SWORD_ATTACKING, firePressed);
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -62,7 +62,8 @@ public class PlayerController : MonoBehaviour
 
         if (firePressed == false)
         {
-            animators.ForEach(anim => anim.SetFloat(ANIM_PARAM_SPEED, input.sqrMagnitude));
+            
+            AnimationSetFloat(ANIM_PARAM_SPEED, input.sqrMagnitude);
             transform.position += (Vector3)input * 5f * Time.deltaTime;
         }
     }
@@ -74,22 +75,47 @@ public class PlayerController : MonoBehaviour
 
         if (absX >= absY)
         {
-            animators.ForEach(anim => anim.SetFloat(ANIM_PARAM_MOVE_X, 1f));
-            animators.ForEach(anim => anim.SetFloat(ANIM_PARAM_MOVE_Y, 0f));
+            AnimationSetFloat(ANIM_PARAM_MOVE_X, 1f);
+            AnimationSetFloat(ANIM_PARAM_MOVE_Y, 0f);
         }
         else
         {
-            animators.ForEach(anim => anim.SetFloat(ANIM_PARAM_MOVE_X, 0f));
-            animators.ForEach(anim => anim.SetFloat(ANIM_PARAM_MOVE_Y, Mathf.Sign(dir.y)));
+            AnimationSetFloat(ANIM_PARAM_MOVE_X, 0f);
+            AnimationSetFloat(ANIM_PARAM_MOVE_Y, Mathf.Sign(dir.y));
         }
 
         if (dir.x != 0)
         {
-            spriteRenderers.ForEach(sp => sp.flipX = dir.x > 0f);
+            SetFlip(dir.x > 0f);
         }
         else
         {
-            spriteRenderers.ForEach(sp => sp.flipX = false);
+            SetFlip(false);
         }
     }
+
+    #region Animation Parameter
+    private void AnimationSetTrigger(int id)
+    {
+        animators.ForEach(anim => anim.SetTrigger(id));
+    }
+
+    private void AnimationSetFloat(int id, float value)
+    {
+        animators.ForEach(anim => anim.SetFloat(id, value));
+    }
+
+    private void AnimationSetBool(int id, bool value)
+    {
+        animators.ForEach(anim => anim.SetBool(id, value));
+    }
+    #endregion
+
+    #region SpriteRenderer
+    private void SetFlip(bool right)
+    {
+        spriteRenderers.ForEach(sp => sp.flipX = right);
+    }        
+    #endregion
+
 }
