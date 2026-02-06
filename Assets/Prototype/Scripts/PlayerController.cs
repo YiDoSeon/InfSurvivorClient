@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using InfSurvivor.Runtime.Manager;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,6 +23,7 @@ public class PlayerController : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private Vector2 collisionOffset;
     [SerializeField] private Vector2 collisionSize;
+    [SerializeField] private float searchRange;
     #endregion
     private Vector2 moveInput;
     private Vector2 lastMoveDir = Vector2.down;
@@ -135,8 +137,23 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         Gizmos.DrawWireCube((Vector3)collisionOffset + transform.position, new Vector3(collisionSize.x, collisionSize.y));
+        Gizmos.DrawWireSphere((Vector3)collisionOffset + transform.position, searchRange);
+
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.black;
+            List<GameObject> nearObjects = Managers.Collision.GetObjectsInRange(transform.position, collisionOffset, searchRange);
+            foreach (GameObject obj in nearObjects)
+            {
+                if (obj == gameObject)
+                {
+                    continue;
+                }
+                Gizmos.DrawWireSphere(obj.transform.position, 0.5f);
+            }
+        }
     }
 }
