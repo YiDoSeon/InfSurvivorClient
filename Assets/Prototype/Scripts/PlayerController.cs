@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using InfSurvivor.Runtime.Managers;
+using InfSurvivor.Runtime.Manager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 

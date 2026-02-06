@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace InfSurvivor.Runtime.Managers
+namespace InfSurvivor.Runtime.Manager
 {
     public class CollisionManager : BehaviourManagerBase
     {
