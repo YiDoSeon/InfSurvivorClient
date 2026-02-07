@@ -28,8 +28,13 @@ namespace InfSurvivor.Runtime.Manager
 
         #region Contents
         private CollisionManager collision;
+        private NetworkManager network = new NetworkManager();
         public static CollisionManager Collision => Instance.collision;
+        public static NetworkManager Network => Instance.network;
         #endregion
+
+        #region Unity 이벤트 함수
+            
 
         private void Awake()
         {
@@ -41,16 +46,30 @@ namespace InfSurvivor.Runtime.Manager
                 DontDestroyOnLoad(gameObject);
                 Init();
             }
-            else if(instance != this)
+            else if (instance != this)
             {
                 Destroy(gameObject);
             }
         }
 
+        private void OnDestroy()
+        {
+            Network.OnDestroy();
+            instance = null;
+            Initialized = false;
+        }
+
+        private void Update()
+        {
+            Network.Update();
+        }
+        #endregion
+
         private static void Init()
         {
             Debug.Assert(Initialized == false, "Managers가 중복 초기화되었습니다.");
             Create(ref instance.collision, nameof(instance.collision));
+            Network.Init();
         }
 
         private static void Create<T>(ref T target, string name) where T : BehaviourManagerBase
@@ -66,13 +85,7 @@ namespace InfSurvivor.Runtime.Manager
         {
             // TODO: Load Resource And Create
         }
-
-        private void Update()
-        {
-
-        }
         
-
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void Clear()
         {
