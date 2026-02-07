@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using InfSurvivor.Runtime.System;
+using InfSurvivor.Runtime.GameSystem;
 using InfSurvivor.Runtime.Utils;
 using UnityEngine;
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using InfSurvivor.Runtime.Manager;
 using UnityEngine;
 
-namespace InfSurvivor.Runtime.System
+namespace InfSurvivor.Runtime.GameSystem
 {
     public class GridSystem : MonoBehaviour
     {
