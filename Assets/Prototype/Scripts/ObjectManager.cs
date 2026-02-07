@@ -28,7 +28,10 @@ public class ObjectManager : IObjectService
             return;
         }
 
-        // TODO: 원격 클라이언트 생성 예외 처리
+        if (objects.ContainsKey(info.ObjectId))
+        {
+            return;
+        }
 
         GameObjectType objectType = GetObjectTypeById(info.ObjectId);
 
@@ -37,15 +40,52 @@ public class ObjectManager : IObjectService
             GameObject go = GameObject.Instantiate(playerPrefab);
             LocalPlayer = go.AddComponent<LocalPlayerController>();
             LocalPlayer.Info = info;
+            LocalPlayer.InitPos(info.PosInfo);
 
             objects.Add(info.ObjectId, go);
             players.Add(info.ObjectId, LocalPlayer);
         }
         else
         {
+            GameObject go = GameObject.Instantiate(playerPrefab);
+            RemotePlayerController rpc = go.AddComponent<RemotePlayerController>();
+            rpc.Info = info;
+            rpc.InitPos(info.PosInfo);
 
+            objects.Add(info.ObjectId, go);
+            players.Add(info.ObjectId, rpc);
+        }
+    }
+
+    public void Remove(int id)
+    {
+        if (LocalPlayer != null && LocalPlayer.Id == id)
+        {
+            return;
         }
 
+        if (objects.ContainsKey(id) == false)
+        {
+            return;
+        }
+
+        GameObject go = FindById(id);
+        if (go == null)
+        {
+            return;
+        }
+
+        objects.Remove(id);
+
+        PlayerController pc = FindPlayerById(id);
+        if (pc == null)
+        {
+            return;
+        }
+        players.Remove(id);
+
+        // TODO: 리소스매니저에서 제거처리
+        GameObject.Destroy(go);
     }
 
     public void OnMoveHandler(PacketSession session, S_Move movePacket)
@@ -104,5 +144,21 @@ public class ObjectManager : IObjectService
         // GameObject.Instantiate(player);
 
         localCharacterManifestBundle.Unload(false);
+    }
+
+    public void AddObjects(List<ObjectInfo> objects)
+    {
+        foreach (ObjectInfo info in objects)
+        {
+            Add(info, false);
+        }
+    }
+
+    public void RemoveObjects(List<int> ids)
+    {
+        foreach (int id in ids)
+        {
+            Remove(id);
+        }
     }
 }

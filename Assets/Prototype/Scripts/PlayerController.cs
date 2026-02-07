@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using InfSurvivor.Runtime.Manager;
+using InfSurvivor.Runtime.Utils;
 using Shared.Packet;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
-public class PlayerController : MonoBehaviour
+public abstract class PlayerController : MonoBehaviour
 {
     #region 애니메이션 파라미터 (hash)
     protected readonly int ANIM_FLOAT_MOVE_X = Animator.StringToHash("MoveX");
@@ -26,6 +27,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] protected Vector2 collisionOffset;
     [SerializeField] protected Vector2 collisionSize;
     [SerializeField] protected float searchRange;
+    [SerializeField] protected float speed;
     #endregion
     private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
 
@@ -36,16 +38,26 @@ public class PlayerController : MonoBehaviour
         set => Info.ObjectId = value;
     }
 
-    private void Awake()
+    protected virtual void Awake()
     {
         Application.targetFrameRate = -1;
         animators = GetComponentsInChildren<Animator>().ToList();
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>().ToList();
+        speed = 5f;
     }
 
     protected virtual void Start()
     {
+    }
 
+    protected virtual void OnEnable()
+    {
+        
+    }
+
+    protected virtual void OnDisable()
+    {
+        Managers.Collision?.RemoveFromCells(occupiedCells, gameObject);
     }
 
     private void Update()
@@ -58,6 +70,8 @@ public class PlayerController : MonoBehaviour
         Tick();
         UpdateOccupiedCells();
     }
+
+    public abstract void InitPos(PositionInfo posInfo);
 
     protected virtual void OnUpdate()
     {

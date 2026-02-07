@@ -24,6 +24,10 @@ namespace InfSurvivor.Runtime.GameSystem
 
         public void AddToCells(HashSet<Vector2Int> coords, GameObject go)
         {
+            if (go == null)
+            {
+                return;
+            }
             foreach (Vector2Int pos in coords)
             {
                 if (gridData.TryGetValue(pos, out HashSet<GameObject> set) == false)
@@ -37,6 +41,10 @@ namespace InfSurvivor.Runtime.GameSystem
 
         public void RemoveFromCells(HashSet<Vector2Int> coords, GameObject go)
         {
+            if (go == null)
+            {
+                return;
+            }
             foreach (Vector2Int pos in coords)
             {
                 if (gridData.TryGetValue(pos, out HashSet<GameObject> set))

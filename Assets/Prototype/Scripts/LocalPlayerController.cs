@@ -11,24 +11,37 @@ public class LocalPlayerController : PlayerController
     public struct PendingMove
     {
         public uint seqNumber;
-        public Vector3 velocity;
+        public Vector2 velocity;
     }
     private bool firePressed;
     private Vector2 moveInput;
     private Vector2 lastMoveDir = Vector2.down;
     private Vector2 lastInput = Vector2.zero;
-    private Vector3 targetPosition;
+    private Vector2 targetPosition;
     private bool needsSyncMove;
     private uint seqNumber = 0;
     private List<PendingMove> pendingMoves = new List<PendingMove>();
 
     protected override void Start()
     {
+        base.Start();
         // TODO: 데이터 로드 방식으로 변경
         collisionOffset = new Vector2(0, 0.5f);
         collisionSize = new Vector2(1f, 1.76f);
         searchRange = 2.5f;
+        StartCoroutine(CoSyncMovement());
+    }
 
+    public override void InitPos(PositionInfo posInfo)
+    {
+        targetPosition = transform.position = posInfo.Pos.ToUnityVector3();
+        lastMoveDir = lastInput = posInfo.Velocity.ToUnityVector3();
+        ApplyFacingDirection(lastMoveDir);
+        AnimationSetFloat(ANIM_FLOAT_SPEED, lastInput.sqrMagnitude);
+    }
+
+    protected override void OnEnable()
+    {
         InputAction moveAction = InputSystem.actions.FindAction("Move");
         moveAction.performed += OnMoveInput;
         moveAction.canceled += OnMoveInput;
@@ -38,12 +51,9 @@ public class LocalPlayerController : PlayerController
         fireAction.performed += OnFireInput;
         fireAction.canceled += OnFireInput;
         fireAction.Enable();
-
-        targetPosition = transform.position;
-        StartCoroutine(CoSyncMovement());
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
         InputAction moveAction = InputSystem.actions.FindAction("Move");
         moveAction.performed -= OnMoveInput;
@@ -54,6 +64,8 @@ public class LocalPlayerController : PlayerController
         fireAction.performed -= OnFireInput;
         fireAction.canceled -= OnFireInput;
         fireAction.Disable();
+
+        base.OnDisable();
     }
 
     private void OnFireInput(InputAction.CallbackContext context)
@@ -112,7 +124,7 @@ public class LocalPlayerController : PlayerController
 
         if (firePressed == false)
         {
-            targetPosition += (Vector3)moveInput * 5f * Time.fixedDeltaTime;
+            targetPosition += speed * moveInput * Time.fixedDeltaTime;
         }
     }
 
@@ -133,7 +145,7 @@ public class LocalPlayerController : PlayerController
                 PosInfo = new PositionInfo()
                 {
                     Pos = targetPosition.ToCVector2(),
-                    Velocity = 5f * lastInput.ToCVector2(),
+                    Velocity = speed * lastInput.ToCVector2(),
                 }
             };
             Managers.Network.Send(movePacket);
