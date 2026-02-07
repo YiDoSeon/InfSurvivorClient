@@ -51,12 +51,12 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         OnUpdate();
-        UpdateOccupiedCells();
     }
 
     private void FixedUpdate()
     {
         Tick();
+        UpdateOccupiedCells();
     }
 
     protected virtual void OnUpdate()
@@ -69,7 +69,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    protected void UpdateOccupiedCells()
+    private void UpdateOccupiedCells()
     {
         Managers.Collision.UpdateOccupiedCells(gameObject, occupiedCells, collisionOffset, collisionSize);
     }
