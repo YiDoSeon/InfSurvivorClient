@@ -16,8 +16,23 @@ namespace InfSurvivor.Runtime.Manager
             this.gridSystem = gridVisualizer;
         }
 
+        public void AddToCells(HashSet<Vector2Int> occupiedCells, GameObject go)
+        {
+            gridSystem?.AddToCells(occupiedCells, go);
+        }
+        
+        public void RemoveFromCells(HashSet<Vector2Int> occupiedCells, GameObject go)
+        {
+            gridSystem?.RemoveFromCells(occupiedCells, go);
+        }
+
         public void UpdateOccupiedCells(GameObject go, HashSet<Vector2Int> occupiedCells, Vector2 offset, Vector2 size)
         {
+            if (go == null)
+            {
+                return;
+            }
+
             Vector2 worldPos = offset + new Vector2(go.transform.position.x, go.transform.position.y);
             Vector2 halfSize = size * 0.5f;
             Vector2 minWorldPos = new Vector2(worldPos.x - halfSize.x, worldPos.y - halfSize.y);
@@ -26,7 +41,7 @@ namespace InfSurvivor.Runtime.Manager
             Vector2Int minGridPos = minWorldPos.ToGridPos(CellSize);
             Vector2Int maxGridPos = maxWorldPos.ToGridPos(CellSize);
 
-            gridSystem.RemoveFromCells(occupiedCells, go);
+            RemoveFromCells(occupiedCells, go);
             occupiedCells.Clear();
 
             for (int x = minGridPos.x; x <= maxGridPos.x; x++)
@@ -38,7 +53,7 @@ namespace InfSurvivor.Runtime.Manager
                 }
             }
 
-            gridSystem.AddToCells(occupiedCells, go);
+            AddToCells(occupiedCells, go);
         }
 
         public List<GameObject> GetObjectsInRange(Vector2 center, Vector2 offset, float range, bool alsoCheckObjectBox = true)

@@ -8,18 +8,31 @@ namespace InfSurvivor.Runtime.Manager
         #region Singleton
         private const string MANGER_NAME = "@Managers";
         public static bool Initialized { get; private set; }
+        public static bool IsDestroying { get; private set; } = false;
         private static Managers instance;
         public static Managers Instance
         {
             get
             {
+                if (IsDestroying)
+                {
+                    return null;
+                }
                 if (instance == null)
                 {
                     Managers manager = FindFirstObjectByType<Managers>();
                     if (manager == null)
                     {
                         GameObject go = new GameObject();
-                        go.AddComponent<Managers>();                        
+                        instance = go.AddComponent<Managers>();
+                    }
+                    
+                    if (instance == null)
+                    {
+                        instance = manager;
+
+                        DontDestroyOnLoad(manager.gameObject);
+                        Init();
                     }
                 }
                 return instance;
@@ -32,13 +45,13 @@ namespace InfSurvivor.Runtime.Manager
         private NetworkManager network = new NetworkManager();
         private IObjectService @object;
 
-        public static CollisionManager Collision => Instance.collision;
-        public static NetworkManager Network => Instance.network;
-        public static IObjectService Object => Instance.@object;
+        public static CollisionManager Collision => Instance?.collision;
+
+        public static NetworkManager Network => Instance?.network;
+        public static IObjectService Object => Instance?.@object;
         #endregion
 
         #region Unity 이벤트 함수
-            
 
         private void Awake()
         {
@@ -61,6 +74,7 @@ namespace InfSurvivor.Runtime.Manager
             Network.OnDestroy();
             instance = null;
             Initialized = false;
+            IsDestroying = true;
         }
 
         private void Update()
@@ -96,6 +110,7 @@ namespace InfSurvivor.Runtime.Manager
         {
             instance = null;
             Initialized = false;
+            IsDestroying = false;
         }
 
         #region Temp (Will Be Removed)
