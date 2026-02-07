@@ -214,7 +214,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6323616739901478145}
-  - component: {fileID: 1464497600617382342}
+  - component: {fileID: -8020277382799752055}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -241,7 +241,7 @@ Transform:
   - {fileID: 6323616739775396547}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1464497600617382342
+--- !u!114 &-8020277382799752055
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -250,17 +250,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 6323616739901478146}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21612a2be96bc9648b0afce4af9a6eee, type: 3}
+  m_Script: {fileID: 11500000, guid: 097d0b9b91c9d58418e7af288f2a0ec7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Prototype::PlayerController
-  animators:
-  - {fileID: 3883280770753817670}
-  - {fileID: 4995005397864338013}
-  - {fileID: 5453232512306356255}
-  spriteRenderers:
-  - {fileID: 4229631137104855331}
-  - {fileID: 3092507948775023557}
-  - {fileID: 3118832638951615860}
+  m_EditorClassIdentifier: Prototype::LocalPlayerController
   collisionOffset: {x: 0, y: 0.5}
   collisionSize: {x: 1, y: 1.76}
   searchRange: 2.5

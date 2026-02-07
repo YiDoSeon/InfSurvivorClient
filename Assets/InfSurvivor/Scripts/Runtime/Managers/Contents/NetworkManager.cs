@@ -111,6 +111,11 @@ namespace InfSurvivor.Runtime.Manager
                 return;
             }
 
+            if (isSynced == false)
+            {
+                Debug.Log("시간 동기화 완료.");
+            }
+
             long t1 = packet.ClientTime; // 패킷을 보낸 시간
             long ts = packet.ServerTime; // 서버 현재 시간 2000
             long t2 = GetLocalTick(); // 로컬 시간

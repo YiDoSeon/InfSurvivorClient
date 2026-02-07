@@ -11,6 +11,7 @@ public class PacketHandler
         S_Connected connectedPacket = (S_Connected)packet;
         if (connectedPacket.Ok)
         {
+            Debug.Log("서버와 연결되었습니다.");
             Managers.Network.OnSuccessReceiveConnectPacket();
         }
     }
