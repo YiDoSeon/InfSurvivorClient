@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        Application.targetFrameRate = -1;
     }
 
     private void Start()
@@ -74,7 +75,6 @@ public class PlayerController : MonoBehaviour
 
         if (firePressed == false)
         {
-
             AnimationSetFloat(ANIM_FLOAT_SPEED, input.sqrMagnitude);
             transform.position += (Vector3)input * 5f * Time.deltaTime;
         }
