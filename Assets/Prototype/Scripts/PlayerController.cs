@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
+[DisallowMultipleComponent]
 public class PlayerController : MonoBehaviour
 {
     #region 애니메이션 파라미터 (hash)
@@ -23,9 +23,9 @@ public class PlayerController : MonoBehaviour
     private List<SpriteRenderer> spriteRenderers;
 
     [Header("Settings")]
-    [SerializeField] private Vector2 collisionOffset;
-    [SerializeField] private Vector2 collisionSize;
-    [SerializeField] private float searchRange;
+    [SerializeField] protected Vector2 collisionOffset;
+    [SerializeField] protected Vector2 collisionSize;
+    [SerializeField] protected float searchRange;
     #endregion
     private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
 

@@ -25,6 +25,7 @@ public class PacketHandler
     public static void S_MoveHandler(PacketSession session, IPacket packet)
     {
         S_Move movePacket = (S_Move)packet;
+        Managers.Object.OnMoveHandler(session, movePacket);
     }
 
     public static void S_PingHandler(PacketSession session, IPacket packet)

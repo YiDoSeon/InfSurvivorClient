@@ -1,12 +1,15 @@
+using System.Collections.Generic;
 using System.IO;
 using InfSurvivor.Runtime.Manager;
 using Shared.Packet;
+using Shared.Session;
 using UnityEngine;
 
 public class ObjectManager : IObjectService
 {
     public PlayerController LocalPlayer { get; private set; }
-
+    private Dictionary<int, GameObject> objects = new Dictionary<int, GameObject>();
+    private Dictionary<int, PlayerController> players = new Dictionary<int, PlayerController>();
 
     public static GameObjectType GetObjectTypeById(int id)
     {
@@ -32,14 +35,40 @@ public class ObjectManager : IObjectService
         if (localPlayer)
         {
             GameObject go = GameObject.Instantiate(playerPrefab);
-            LocalPlayer = go.GetComponent<PlayerController>();
+            LocalPlayer = go.AddComponent<LocalPlayerController>();
             LocalPlayer.Info = info;
+
+            objects.Add(info.ObjectId, go);
+            players.Add(info.ObjectId, LocalPlayer);
         }
         else
         {
 
         }
 
+    }
+
+    public void OnMoveHandler(PacketSession session, S_Move movePacket)
+    {
+        PlayerController pc = FindPlayerById(movePacket.ObjectId);
+        if (pc == null)
+        {
+            return;
+        }
+
+        pc.OnUpdateMoveState(movePacket);
+    }
+
+    public GameObject FindById(int id)
+    {
+        objects.TryGetValue(id, out GameObject go);
+        return go;
+    }
+    
+    public PlayerController FindPlayerById(int id)
+    {
+        players.TryGetValue(id, out PlayerController player);
+        return player;
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]

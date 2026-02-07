@@ -1,4 +1,5 @@
 using Shared.Packet;
+using Shared.Session;
 using UnityEngine;
 
 namespace InfSurvivor.Runtime.Manager
@@ -11,5 +12,6 @@ namespace InfSurvivor.Runtime.Manager
     {
         public void Add(ObjectInfo info, bool localPlayer = false);
         public void LoadPlayerResource();
+        public void OnMoveHandler(PacketSession session, S_Move movePacket);
     }
 }
