@@ -1,3 +1,4 @@
+using Shared.Packet;
 using UnityEngine;
 
 namespace InfSurvivor.Runtime.Manager
@@ -8,6 +9,7 @@ namespace InfSurvivor.Runtime.Manager
 
     public interface IObjectService
     {
+        public void Add(ObjectInfo info, bool localPlayer = false);
         public void LoadPlayerResource();
     }
 }

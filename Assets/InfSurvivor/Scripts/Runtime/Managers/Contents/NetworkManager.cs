@@ -4,6 +4,7 @@ using System.Net;
 using InfSurvivor.Runtime.Network;
 using Shared.Packet;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace InfSurvivor.Runtime.Manager
 {
@@ -44,6 +45,13 @@ namespace InfSurvivor.Runtime.Manager
             }
 
             offset = Mathf.Lerp(offset, targetOffset, 0.05f);
+            
+            if (IsSessionValidated && Keyboard.current.enterKey.wasPressedThisFrame)
+            {
+                C_EnterGame enterGamePacket = new C_EnterGame();
+                enterGamePacket.Name = "플레이어";
+                serverSession.Send(enterGamePacket);
+            }
         }
 
         private void ProcessPackets()

@@ -18,6 +18,7 @@ public class PacketHandler
     public static void S_EnterGameHandler(PacketSession session, IPacket packet)
     {
         S_EnterGame enterGamePacket = (S_EnterGame)packet;
+        Managers.Object.Add(enterGamePacket.Player, true);
     }
 
     public static void S_MoveHandler(PacketSession session, IPacket packet)
@@ -33,6 +34,10 @@ public class PacketHandler
     public static void S_SpawnHandler(PacketSession session, IPacket packet)
     {
         S_Spawn spawnPacket = (S_Spawn)packet;
+        foreach (ObjectInfo info in spawnPacket.Objects)
+        {
+            Managers.Object.Add(info, false);            
+        }
     }
 
     public static void S_DespawnHandler(PacketSession session, IPacket packet)

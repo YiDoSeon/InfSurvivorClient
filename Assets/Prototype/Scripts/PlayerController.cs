@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using InfSurvivor.Runtime.Manager;
+using Shared.Packet;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -29,6 +30,13 @@ public class PlayerController : MonoBehaviour
     private Vector2 lastMoveDir = Vector2.down;
     private bool firePressed;
     private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
+
+    public ObjectInfo Info { get; set; } = new ObjectInfo();
+    public int Id
+    {
+        get => Info.ObjectId;
+        set => Info.ObjectId = value;
+    }
 
     private void Awake()
     {
