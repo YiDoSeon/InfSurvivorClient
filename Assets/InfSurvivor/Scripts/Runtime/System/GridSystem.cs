@@ -42,11 +42,11 @@ namespace InfSurvivor.Runtime.GameSystem
                 if (gridData.TryGetValue(pos, out HashSet<GameObject> set))
                 {
                     gridData[pos].Remove(go);
-                }
 
-                if (set.Count == 0)
-                {
-                    gridData.Remove(pos);
+                    if (set.Count == 0)
+                    {
+                        gridData.Remove(pos);
+                    }
                 }
             }
         }
