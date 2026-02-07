@@ -27,6 +27,12 @@ namespace InfSurvivor.Runtime.Manager
             connector.Connect(endPoint, () => serverSession);
         }
 
+        public void OnDestroy()
+        {
+            serverSession?.Close();
+            serverSession = null;
+        }
+
         /// <summary>
         /// 처음 서버와 소켓 연결한뒤, 서버로부터 연결되었다는 패킷을 받았을 때 호출 <br/>
         /// </summary>
@@ -50,7 +56,7 @@ namespace InfSurvivor.Runtime.Manager
             {
                 C_EnterGame enterGamePacket = new C_EnterGame();
                 enterGamePacket.Name = "플레이어";
-                serverSession.Send(enterGamePacket);
+                Send(enterGamePacket);
             }
         }
 
@@ -65,12 +71,10 @@ namespace InfSurvivor.Runtime.Manager
             }
         }
 
-        public void OnDestroy()
+        public void Send<TPacket>(TPacket packet) where TPacket: IPacket
         {
-            serverSession?.Close();
-            serverSession = null;
+            serverSession.Send(packet);
         }
-
 
         #region 시간 관련
         private const float HEART_BEAT_SECONDS = 5f;
@@ -93,7 +97,7 @@ namespace InfSurvivor.Runtime.Manager
                 {
                     ClientTime = GetLocalTick()
                 };
-                serverSession.Send(timeSyncPacket);
+                Send(timeSyncPacket);
             }
         }
         public void HandleSyncTime(S_TimeSync packet)
