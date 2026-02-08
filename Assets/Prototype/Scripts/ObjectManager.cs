@@ -44,6 +44,7 @@ public class ObjectManager : IObjectService
 
             objects.Add(info.ObjectId, go);
             players.Add(info.ObjectId, LocalPlayer);
+            Camera.main.transform.parent = go.transform;
         }
         else
         {

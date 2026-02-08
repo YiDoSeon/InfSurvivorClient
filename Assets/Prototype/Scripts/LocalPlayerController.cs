@@ -8,18 +8,39 @@ using UnityEngine.InputSystem;
 
 public class LocalPlayerController : PlayerController
 {
+    public enum PlayerState
+    {
+        Idle,
+        Move,
+        Skill,
+    }
     public struct PendingMove
     {
         public uint seqNumber;
         public Vector2 velocity;
     }
-    private bool firePressed;
-    private Vector2 moveInput;
-    private Vector2 lastMoveDir = Vector2.down;
-    private Vector2 lastInput = Vector2.zero;
+    private bool lastFirePressed;
+    private Vector2 lastFacingDir = Vector2.down;
+    private Vector2 lastMoveInput;
+    private Vector2 LastVelocity
+    {
+        get
+        {
+            if (state == PlayerState.Move)
+            {
+                return lastMoveInput * moveSpeed;
+            }            
+            else
+            {
+                return Vector2.zero;
+            }
+        }        
+    }
+
     private Vector2 targetPosition;
     private bool needsSyncMove;
     private uint seqNumber = 0;
+    private PlayerState state;
     private List<PendingMove> pendingMoves = new List<PendingMove>();
 
     protected override void Start()
@@ -34,10 +55,10 @@ public class LocalPlayerController : PlayerController
 
     public override void InitPos(PositionInfo posInfo)
     {
-        targetPosition = transform.position = posInfo.Pos.ToUnityVector3();
-        lastMoveDir = lastInput = posInfo.Velocity.ToUnityVector3();
-        ApplyFacingDirection(lastMoveDir);
-        AnimationSetFloat(ANIM_FLOAT_SPEED, lastInput.sqrMagnitude);
+        transform.position = targetPosition = posInfo.Pos.ToUnityVector3();
+        lastFacingDir = posInfo.FacingDir.ToUnityVector2();
+        ApplyFacingDirection(lastFacingDir);
+        AnimationSetFloat(ANIM_FLOAT_SPEED, 0f);
     }
 
     protected override void OnEnable()
@@ -70,45 +91,89 @@ public class LocalPlayerController : PlayerController
 
     private void OnFireInput(InputAction.CallbackContext context)
     {
-        firePressed = context.ReadValue<float>() > 0f;
-        if (firePressed)
+        bool firePressed = context.ReadValue<float>() > 0f;
+        if (firePressed != lastFirePressed)
         {
-            AnimationSetTrigger(ANIM_TRIGGER_SWORD_ATTACK);
+            if (firePressed)
+            {
+                state = PlayerState.Skill;
+                AnimationSetTrigger(ANIM_TRIGGER_SWORD_ATTACK);
+            }
+            else
+            {
+                if (lastMoveInput.sqrMagnitude > 0.01f)
+                {
+                    state = PlayerState.Move;
+                }
+                else
+                {
+                    state = PlayerState.Idle;
+                }
+            }
+            AnimationSetBool(ANIM_BOOL_SWORD_ATTACKING, firePressed);
+
+            lastFirePressed = firePressed;
+            needsSyncMove = true;
         }
-        AnimationSetBool(ANIM_BOOL_SWORD_ATTACKING, firePressed);
     }
 
     private void OnMoveInput(InputAction.CallbackContext context)
     {
-        moveInput = context.ReadValue<Vector2>();
-
-        if (moveInput != lastInput)
+        Vector2 moveInput = context.ReadValue<Vector2>();
+        if (state == PlayerState.Idle)
         {
-            lastInput = moveInput;
+            state = PlayerState.Move;
+        }
+
+        if (moveInput != lastMoveInput)
+        {
+            lastMoveInput = moveInput;
             needsSyncMove = true;
         }
 
-        // 방향이 바뀌었을 때만 변경, 정지시 마지막 방향을 사용
+        // 바라보는 방향은 이동 방향이 바뀌었을 때만 변경, 정지시 마지막 방향을 사용
         if (moveInput.sqrMagnitude > 0.01f)
         {
-            lastMoveDir = moveInput;
+            lastFacingDir = moveInput;
         }
     }
 
     protected override void OnUpdate()
     {
-        ApplyFacingDirection(lastMoveDir);
+        ApplyFacingDirection(lastFacingDir);
 
-        if (firePressed == false)
+        switch (state)
         {
-            AnimationSetFloat(ANIM_FLOAT_SPEED, moveInput.sqrMagnitude);
-
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                targetPosition,
-                5f * Time.deltaTime
-            );
+            case PlayerState.Idle:
+                UpdateIdle();
+                break;
+            case PlayerState.Move:
+                UpdateMove();
+                break;
+            case PlayerState.Skill:
+                UpdateSkill();
+                break;
         }
+    }
+
+    private void UpdateIdle()
+    {
+        AnimationSetFloat(ANIM_FLOAT_SPEED, LastVelocity.sqrMagnitude);
+    }
+
+    private void UpdateMove()
+    {
+        AnimationSetFloat(ANIM_FLOAT_SPEED, LastVelocity.sqrMagnitude);
+
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            targetPosition,
+            moveSpeed * Time.deltaTime
+        );
+    }
+
+    private void UpdateSkill()
+    {
     }
 
     protected override void Tick()
@@ -121,11 +186,33 @@ public class LocalPlayerController : PlayerController
         {
             CreatePendingMove(false);
         }
-
-        if (firePressed == false)
+        switch (state)
         {
-            targetPosition += speed * moveInput * Time.fixedDeltaTime;
+            case PlayerState.Idle:
+                TickIdle();
+                break;
+            case PlayerState.Move:
+                TickMove();
+                break;
+            case PlayerState.Skill:
+                TickSkill();
+                break;
         }
+    }
+
+    private void TickIdle()
+    {
+
+    }
+
+    private void TickMove()
+    {
+        targetPosition += LastVelocity * Time.fixedDeltaTime;
+    }
+
+    private void TickSkill()
+    {
+
     }
 
     private void SendMovePacket()
@@ -145,7 +232,9 @@ public class LocalPlayerController : PlayerController
                 PosInfo = new PositionInfo()
                 {
                     Pos = targetPosition.ToCVector2(),
-                    Velocity = speed * lastInput.ToCVector2(),
+                    Velocity = LastVelocity.ToCVector2(),
+                    FacingDir = lastFacingDir.ToCVector2(),
+                    FirePressed = lastFirePressed,
                 }
             };
             Managers.Network.Send(movePacket);
@@ -153,7 +242,7 @@ public class LocalPlayerController : PlayerController
         PendingMove move = new PendingMove()
         {
             seqNumber = seqNum,
-            velocity = 5 * lastInput
+            velocity = LastVelocity
         };
         seqNumber++;
         pendingMoves.Add(move);
@@ -161,6 +250,7 @@ public class LocalPlayerController : PlayerController
 
     public override void OnUpdateMoveState(S_Move move)
     {
+        //
         pendingMoves.RemoveAll(m =>
         {
             /*  [SeqNumber 순환 처리]

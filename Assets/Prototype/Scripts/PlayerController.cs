@@ -27,7 +27,7 @@ public abstract class PlayerController : MonoBehaviour
     [SerializeField] protected Vector2 collisionOffset;
     [SerializeField] protected Vector2 collisionSize;
     [SerializeField] protected float searchRange;
-    [SerializeField] protected float speed;
+    [SerializeField] protected float moveSpeed;
     #endregion
     private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
 
@@ -40,10 +40,9 @@ public abstract class PlayerController : MonoBehaviour
 
     protected virtual void Awake()
     {
-        Application.targetFrameRate = -1;
         animators = GetComponentsInChildren<Animator>().ToList();
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>().ToList();
-        speed = 5f;
+        moveSpeed = 5f;
     }
 
     protected virtual void Start()
