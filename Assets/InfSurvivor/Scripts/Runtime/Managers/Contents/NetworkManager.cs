@@ -17,6 +17,7 @@ namespace InfSurvivor.Runtime.Manager
         public void Init()
         {
             ConnectToGame();
+            Application.quitting += OnQuitting;
         }
 
         public void ConnectToGame()
@@ -28,6 +29,17 @@ namespace InfSurvivor.Runtime.Manager
         }
 
         public void OnDestroy()
+        {
+            Close();
+        }
+
+        private void OnQuitting()
+        {
+            Application.quitting -= OnQuitting;
+            Close();
+        }
+
+        private void Close()
         {
             serverSession?.Close();
             serverSession = null;
