@@ -43,6 +43,7 @@ public class LocalPlayerController : PlayerController
         ApplyFacingDirection(posInfo.FacingDir.ToUnityVector2());
         AnimationSetFloat(ANIM_FLOAT_SPEED, 0f);
     }
+    
     public void SetDirtySyncMove()
     {
         needsSyncMove = true;

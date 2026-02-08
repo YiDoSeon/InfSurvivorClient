@@ -17,6 +17,7 @@ public class RemotePlayerController : PlayerController
         ApplyFacingDirection(LastFacingDir);
         AnimationSetFloat(ANIM_FLOAT_SPEED, LastVelocity.sqrMagnitude);
     }
+    
     protected override void Update()
     {
         base.Update();

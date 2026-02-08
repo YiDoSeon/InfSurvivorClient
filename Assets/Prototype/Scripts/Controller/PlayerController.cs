@@ -18,48 +18,49 @@ public abstract class PlayerController : MonoBehaviour
     public readonly int ANIM_TRIGGER_SWORD_ATTACK = Animator.StringToHash("SwordAttack");
     #endregion
 
-    #region SerializeField
-    [Header("Component")]
+    #region Components
     public List<Animator> Animators { get; private set; }
     public List<SpriteRenderer> Renderers { get; private set; }
+    #endregion
 
-    [Header("Settings")]
+    #region Stats
     public Vector2 CollisionOffset { get; private set; }
     public Vector2 CollisionSize { get; private set; }
     public float SearchRange { get; private set; }
     public float MoveSpeed { get; private set; }
     #endregion
-    private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
 
+    private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
+    public Vector2 LastFacingDir { get; protected set; } = Vector2.down;
+    public Vector2 LastVelocity { get; protected set; }
+    public Vector2 TargetPosition { get; protected set; }
+
+    #region Network Property
     public ObjectInfo Info { get; set; } = new ObjectInfo();
     public int Id
     {
         get => Info.ObjectId;
         set => Info.ObjectId = value;
-    }
-    public Vector2 LastFacingDir { get; protected set; } = Vector2.down;
-    public Vector2 LastVelocity { get; protected set; }
-    public Vector2 TargetPosition { get; protected set; }
+    }        
+    #endregion
 
     protected virtual void Awake()
     {
         Animators = GetComponentsInChildren<Animator>().ToList();
         Renderers = GetComponentsInChildren<SpriteRenderer>().ToList();
-        MoveSpeed = 5f;
     }
 
+    #region Unity Events
     protected virtual void Start()
     {
         // TODO: 데이터 로드 방식으로 변경
         CollisionOffset = new Vector2(0, 0.5f);
         CollisionSize = new Vector2(1f, 1.76f);
         SearchRange = 2.5f;
+        MoveSpeed = 5f;
     }
 
-    protected virtual void OnEnable()
-    {
-        
-    }
+    protected virtual void OnEnable() { }
 
     protected virtual void OnDisable()
     {
@@ -74,6 +75,7 @@ public abstract class PlayerController : MonoBehaviour
     {
         UpdateOccupiedCells();
     }
+    #endregion
 
     public abstract void InitPos(PositionInfo posInfo);
 
@@ -140,11 +142,14 @@ public abstract class PlayerController : MonoBehaviour
     }
     #endregion
 
+    #region Network Response Method
     public virtual void OnUpdateMoveState(S_Move move)
     {
-        
-    }
 
+    }
+    #endregion
+
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireCube((Vector3)CollisionOffset + transform.position, new Vector3(CollisionSize.x, CollisionSize.y));
@@ -164,5 +169,5 @@ public abstract class PlayerController : MonoBehaviour
             }
         }
     }
-
+#endif
 }
