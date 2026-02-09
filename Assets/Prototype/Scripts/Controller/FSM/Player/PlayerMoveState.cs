@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class PlayerMoveState : PlayerStateBase
 {
-    private Vector2 lastMoveInput;
     public PlayerMoveState(LocalPlayerController entity, StateMachine<LocalPlayerController, PlayerState> stateMachine) : base(entity, stateMachine)
     {
     }
