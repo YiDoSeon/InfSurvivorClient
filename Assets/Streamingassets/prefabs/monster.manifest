@@ -1,16 +1,16 @@
 ManifestFileVersion: 0
 UnityVersion: 6000.3.7f1
-CRC: 1450976668
+CRC: 3170715508
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: ef0a962d2e5304befe2e7f36b385c701
+    Hash: a9e28789600cc9db33281a3702422d81
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 50e981428f7ec02ce1eed022dc491a1f
+    Hash: cae6beee5dcd43f14093226c248bcb3a
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: e67c8fd5760484a7e8d4bfc57c5ba9fd
+    Hash: a111eba822b5e590327986582caa137a
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -23,23 +23,15 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
-- Class: 74
-  Script: {instanceID: 0}
-- Class: 91
-  Script: {instanceID: 0}
-- Class: 95
-  Script: {instanceID: 0}
 - Class: 114
-  Script: {fileID: 11500000, guid: 9d64b6959ced504429325d299148d35a, type: 3}
+  Script: {fileID: 11500000, guid: 48ba9a5720dd30d45904283d7ec49277, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 212
   Script: {instanceID: 0}
 - Class: 213
   Script: {instanceID: 0}
-- Class: 221
-  Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
-- Assets/Prototype/Prefabs/Player.prefab
+- Assets/Prototype/Prefabs/Monster/Slime.prefab
 Dependencies: []

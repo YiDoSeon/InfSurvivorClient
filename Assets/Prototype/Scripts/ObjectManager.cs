@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using InfSurvivor.Runtime.Manager;
+using InfSurvivor.Runtime.Utils;
 using Shared.Packet;
 using Shared.Session;
 using UnityEngine;
@@ -52,26 +53,36 @@ public class ObjectManager : IObjectService
 
         GameObjectType objectType = GetObjectTypeById(info.ObjectId);
 
-        if (localPlayer)
+        if (objectType == GameObjectType.Player)
         {
-            GameObject go = GameObject.Instantiate(playerPrefab);
-            LocalPlayer = go.AddComponent<LocalPlayerController>();
-            LocalPlayer.Info = info;
-            LocalPlayer.InitPos(info.PosInfo);
+            if (localPlayer)
+            {
+                GameObject go = GameObject.Instantiate(playerPrefab);
+                LocalPlayer = go.AddComponent<LocalPlayerController>();
+                LocalPlayer.Info = info;
+                LocalPlayer.InitPos(info.PosInfo);
 
-            objects.Add(info.ObjectId, go);
-            players.Add(info.ObjectId, LocalPlayer);
-            Camera.main.transform.parent = go.transform;
+                objects.Add(info.ObjectId, go);
+                players.Add(info.ObjectId, LocalPlayer);
+                Camera.main.transform.parent = go.transform;
+            }
+            else
+            {
+                GameObject go = GameObject.Instantiate(playerPrefab);
+                RemotePlayerController rpc = go.AddComponent<RemotePlayerController>();
+                rpc.Info = info;
+                rpc.InitPos(info.PosInfo);
+
+                objects.Add(info.ObjectId, go);
+                players.Add(info.ObjectId, rpc);
+            }
         }
-        else
+        else if (objectType == GameObjectType.Monster)
         {
-            GameObject go = GameObject.Instantiate(playerPrefab);
-            RemotePlayerController rpc = go.AddComponent<RemotePlayerController>();
-            rpc.Info = info;
-            rpc.InitPos(info.PosInfo);
-
-            objects.Add(info.ObjectId, go);
-            players.Add(info.ObjectId, rpc);
+            GameObject monsterPrefab = LoadObject<GameObject>("prefabs/monster", "Slime");
+            GameObject go = GameObject.Instantiate(monsterPrefab);
+            go.name = info.Name;
+            go.transform.position = info.PosInfo.Pos.ToUnityVector2();
         }
     }
 
