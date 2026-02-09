@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using InfSurvivor.Runtime.Manager;
 using InfSurvivor.Runtime.Utils;
 using Shared.Packet;
+using Shared.Packet.Struct;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class LocalPlayerController : PlayerController
 {
@@ -179,8 +179,8 @@ public class LocalPlayerController : PlayerController
         if (Application.isPlaying)
         {
             Gizmos.color = Color.red;
-            Vector3 offset = transform.position + (Vector3)(CollisionOffset + Dir4 * 0.7f);
-            Gizmos.DrawWireSphere(offset, 0.75f);
+            CVector2 offset = transform.position.ToCVector2() + hitCollider.Offset + Dir4.ToCVector2() * 0.7f;
+            Gizmos.DrawWireSphere(offset.ToUnityVector3(), 0.75f);
         }
     }
 #endif

@@ -3,12 +3,12 @@ using System.Linq;
 using InfSurvivor.Runtime.Manager;
 using InfSurvivor.Runtime.Utils;
 using Shared.Packet;
-using UnityEditor;
+using Shared.Packet.Struct;
+using Shared.Physics.Collider;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
-public abstract class PlayerController : MonoBehaviour
+public abstract class PlayerController : MonoBehaviour, IColliderTrigger
 {
     #region 애니메이션 파라미터 (hash)
     public readonly int ANIM_FLOAT_MOVE_X = Animator.StringToHash("MoveX");
@@ -24,13 +24,10 @@ public abstract class PlayerController : MonoBehaviour
     #endregion
 
     #region Stats
-    public Vector2 CollisionOffset { get; private set; }
-    public Vector2 CollisionSize { get; private set; }
-    public float SearchRange { get; private set; }
     public float MoveSpeed { get; private set; }
     #endregion
 
-    private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
+    private HashSet<CVector2Int> occupiedCells = new HashSet<CVector2Int>();
     public Vector2 LastFacingDir { get; protected set; } = Vector2.down;
     // x == -1(L), 1(R)
     // y == 1(U), -1(D)
@@ -38,6 +35,7 @@ public abstract class PlayerController : MonoBehaviour
     public Vector2 Dir4 => direction4;
     public Vector2 LastVelocity { get; protected set; }
     public Vector2 TargetPosition { get; protected set; }
+    protected CBoxCollider hitCollider;
 
     #region Network Property
     public ObjectInfo Info { get; set; } = new ObjectInfo();
@@ -57,9 +55,13 @@ public abstract class PlayerController : MonoBehaviour
     protected virtual void Start()
     {
         // TODO: 데이터 로드 방식으로 변경
-        CollisionOffset = new Vector2(0, 0.5f);
-        CollisionSize = new Vector2(1f, 1.76f);
-        SearchRange = 2.5f;
+        hitCollider = new CBoxCollider(
+            this,
+            new CVector2(0, 0.5f),
+            TargetPosition.ToCVector2(),
+            new CVector2(0.6f, 1f));
+        hitCollider.Layer = CollisionLayer.Player;
+        Managers.Collision.RegisterCollider(hitCollider);
         MoveSpeed = 5f;
     }
 
@@ -67,7 +69,8 @@ public abstract class PlayerController : MonoBehaviour
 
     protected virtual void OnDisable()
     {
-        Managers.Collision?.RemoveFromCells(occupiedCells, gameObject);
+        Managers.Collision?.UnregisterCollider(hitCollider);
+        Managers.Collision?.RemoveFromCells(occupiedCells, hitCollider);
     }
 
     protected virtual void Update()
@@ -84,7 +87,8 @@ public abstract class PlayerController : MonoBehaviour
 
     private void UpdateOccupiedCells()
     {
-        Managers.Collision.UpdateOccupiedCells(gameObject, occupiedCells, CollisionOffset, CollisionSize);
+        hitCollider.UpdatePosition(TargetPosition.ToCVector2());
+        Managers.Collision.UpdateOccupiedCells(hitCollider, occupiedCells);
     }
 
 
@@ -156,25 +160,26 @@ public abstract class PlayerController : MonoBehaviour
     }
     #endregion
 
+    public void OnCustomTriggerEnter(ColliderBase other)
+    {
+
+    }
+
+    public void OnCustomTriggerStay(ColliderBase other)
+    {
+
+    }
+
+    public void OnCustomTriggerExit(ColliderBase other)
+    {
+
+    }
+
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube((Vector3)CollisionOffset + transform.position, new Vector3(CollisionSize.x, CollisionSize.y));
-        Gizmos.DrawWireSphere((Vector3)CollisionOffset + transform.position, SearchRange);
-
-        if (Application.isPlaying)
-        {
-            Gizmos.color = Color.black;
-            List<GameObject> nearObjects = Managers.Collision.GetObjectsInRange(transform.position, CollisionOffset, SearchRange);
-            foreach (GameObject obj in nearObjects)
-            {
-                if (obj == gameObject)
-                {
-                    continue;
-                }
-                Gizmos.DrawWireSphere(obj.transform.position, 0.5f);
-            }
-        }
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(hitCollider.Center.ToUnityVector3(), hitCollider.Size.ToUnityVector3());
     }
 #endif
 }

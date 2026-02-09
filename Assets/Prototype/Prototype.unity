@@ -11263,7 +11263,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e274586165265c2429481f901a271002, type: 3}
   m_Name: 
   m_EditorClassIdentifier: InfSurvivor.Runtime::InfSurvivor.Runtime.GridVisualizer
-  cellSize: 4
+  cellSize: 2
   gridColor: {r: 0.53144646, g: 1, b: 0.8943693, a: 1}
 --- !u!4 &2015776281
 Transform:

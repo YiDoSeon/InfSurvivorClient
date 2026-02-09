@@ -1,4 +1,5 @@
 using Shared.Packet;
+using Shared.Packet.Struct;
 using UnityEngine;
 
 namespace InfSurvivor.Runtime.Utils
@@ -21,7 +22,15 @@ namespace InfSurvivor.Runtime.Utils
                 Mathf.FloorToInt(worldPos.x / cellSize),
                 Mathf.FloorToInt(worldPos.y / cellSize)
             );
-        }            
+        }
+        public static CVector2Int ToGridPos(this CVector2 worldPos, float cellSize)
+        {
+            return new CVector2Int
+            (
+                Mathf.FloorToInt(worldPos.x / cellSize),
+                Mathf.FloorToInt(worldPos.y / cellSize)
+            );
+        }
         #endregion
 
         #region Unity Vector <-> CVector            

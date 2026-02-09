@@ -41,7 +41,7 @@ namespace InfSurvivor.Runtime.Manager
         #endregion
 
         #region Contents
-        private CollisionManager collision;
+        private CollisionManager collision = new CollisionManager();
         private NetworkManager network = new NetworkManager();
         private IObjectService @object;
 
@@ -81,12 +81,18 @@ namespace InfSurvivor.Runtime.Manager
         {
             Network.Update();
         }
+
+        private void FixedUpdate()
+        {
+            Collision.OnTick();
+        }
         #endregion
 
         private static void Init()
         {
             Debug.Assert(Initialized == false, "Managers가 중복 초기화되었습니다.");
-            Create(ref instance.collision, nameof(instance.collision));
+            //Create(ref instance.collision, nameof(instance.collision));
+            instance.collision.InitMatrix();
             instance.@object = objectFactory?.Invoke();
             Network.Init();
         }
