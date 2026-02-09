@@ -179,8 +179,8 @@ public class LocalPlayerController : PlayerController
         if (Application.isPlaying)
         {
             Gizmos.color = Color.red;
-            Vector3 offset = transform.position + (Vector3)(CollisionOffset + Dir4 * 0.6f);
-            Gizmos.DrawWireSphere(offset, 0.7f);
+            Vector3 offset = transform.position + (Vector3)(CollisionOffset + Dir4 * 0.7f);
+            Gizmos.DrawWireSphere(offset, 0.75f);
         }
     }
 #endif

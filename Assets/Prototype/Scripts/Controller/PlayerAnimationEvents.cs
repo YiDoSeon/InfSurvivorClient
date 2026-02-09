@@ -14,8 +14,8 @@ public class PlayerAnimationEvents : MonoBehaviour
 
     private void CheckMeleeAttack()
     {
-        Vector3 offset = (Vector3)(player.CollisionOffset + player.Dir4 * 0.6f);
-        float range = 0.7f;
+        Vector3 offset = (Vector3)(player.CollisionOffset + player.Dir4 * 0.7f);
+        float range = 0.75f;
         List<GameObject> objects = Managers.Collision.GetObjectsInRange(player.transform.position, offset, range);
         foreach (GameObject obj in objects)
         {
