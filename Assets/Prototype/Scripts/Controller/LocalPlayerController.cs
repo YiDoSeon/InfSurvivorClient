@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class LocalPlayerController : PlayerController
-{        
+{
     public struct PendingMove
     {
         public uint seqNumber;
@@ -19,22 +19,30 @@ public class LocalPlayerController : PlayerController
 
     private StateMachine<LocalPlayerController, PlayerState> stateMachine;
     public PlayerInputHandler InputHandler { get; private set; }
+    public PlayerAnimationEvents AnimationEvents { get; private set; }
+
+    protected override void Awake()
+    {
+        base.Awake();
+        InputHandler = gameObject.AddComponent<PlayerInputHandler>();
+        AnimationEvents = gameObject.GetComponentInChildren<PlayerAnimationEvents>();
+    }
 
     protected override void Start()
     {
         base.Start();
+        AnimationEvents.SetPlayer(this);
         CreateStateMachine();
         StartCoroutine(CoSyncMovement());
     }
 
     private void CreateStateMachine()
     {
-        InputHandler = gameObject.AddComponent<PlayerInputHandler>();
         stateMachine = new StateMachine<LocalPlayerController, PlayerState>(this);
         stateMachine.AddState(PlayerState.Idle, new PlayerIdleState(this, stateMachine));
         stateMachine.AddState(PlayerState.Move, new PlayerMoveState(this, stateMachine));
         stateMachine.AddState(PlayerState.MeleeAttack, new PlayerMeleeAttackState(this, stateMachine));
-        stateMachine.Initialize(PlayerState.Idle);        
+        stateMachine.Initialize(PlayerState.Idle);
     }
 
     public override void InitPos(PositionInfo posInfo)
@@ -43,7 +51,7 @@ public class LocalPlayerController : PlayerController
         ApplyFacingDirection(posInfo.FacingDir.ToUnityVector2());
         AnimationSetFloat(ANIM_FLOAT_SPEED, 0f);
     }
-    
+
     public void SetDirtySyncMove()
     {
         needsSyncMove = true;
@@ -149,7 +157,7 @@ public class LocalPlayerController : PlayerController
         float after = TargetPosition.sqrMagnitude;
         if (before - after > 0.01f)
         {
-            Debug.Log("튐");            
+            Debug.Log("튐");
         }
     }
 
@@ -163,4 +171,17 @@ public class LocalPlayerController : PlayerController
         }
     }
 
+#if UNITY_EDITOR
+    protected override void OnDrawGizmos()
+    {
+        base.OnDrawGizmos();
+
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.red;
+            Vector3 offset = transform.position + (Vector3)(CollisionOffset + Dir4 * 0.6f);
+            Gizmos.DrawWireSphere(offset, 0.7f);
+        }
+    }
+#endif
 }

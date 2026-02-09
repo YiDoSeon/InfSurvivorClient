@@ -32,6 +32,10 @@ public abstract class PlayerController : MonoBehaviour
 
     private HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
     public Vector2 LastFacingDir { get; protected set; } = Vector2.down;
+    // x == -1(L), 1(R)
+    // y == 1(U), -1(D)
+    private Vector2 direction4;
+    public Vector2 Dir4 => direction4;
     public Vector2 LastVelocity { get; protected set; }
     public Vector2 TargetPosition { get; protected set; }
 
@@ -44,13 +48,12 @@ public abstract class PlayerController : MonoBehaviour
     }        
     #endregion
 
+    #region Unity Events
     protected virtual void Awake()
     {
         Animators = GetComponentsInChildren<Animator>().ToList();
         Renderers = GetComponentsInChildren<SpriteRenderer>().ToList();
     }
-
-    #region Unity Events
     protected virtual void Start()
     {
         // TODO: 데이터 로드 방식으로 변경
@@ -99,11 +102,15 @@ public abstract class PlayerController : MonoBehaviour
         {
             AnimationSetFloat(ANIM_FLOAT_MOVE_X, 1f);
             AnimationSetFloat(ANIM_FLOAT_MOVE_Y, 0f);
+            direction4.x = Mathf.Sign(dir.x);
+            direction4.y = 0f;
         }
         else
         {
             AnimationSetFloat(ANIM_FLOAT_MOVE_X, 0f);
             AnimationSetFloat(ANIM_FLOAT_MOVE_Y, Mathf.Sign(dir.y));
+            direction4.x = 0f;
+            direction4.y = Mathf.Sign(dir.y);
         }
 
         if (dir.x != 0)
@@ -150,7 +157,7 @@ public abstract class PlayerController : MonoBehaviour
     #endregion
 
 #if UNITY_EDITOR
-    private void OnDrawGizmos()
+    protected virtual void OnDrawGizmos()
     {
         Gizmos.DrawWireCube((Vector3)CollisionOffset + transform.position, new Vector3(CollisionSize.x, CollisionSize.y));
         Gizmos.DrawWireSphere((Vector3)CollisionOffset + transform.position, SearchRange);
