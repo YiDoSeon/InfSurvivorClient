@@ -8,7 +8,7 @@ public class PlayerIdleState : PlayerStateBase
 
     public override void Enter()
     {
-        entity.UpdateVelocity(PlayerState.Idle);
+        UpdateVelocity(PlayerState.Idle);
         entity.SetDirtySyncMove();
     }
 

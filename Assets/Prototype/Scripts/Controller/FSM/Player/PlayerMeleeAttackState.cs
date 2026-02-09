@@ -11,7 +11,7 @@ public class PlayerMeleeAttackState : PlayerStateBase
         entity.AnimationSetFloat(entity.ANIM_FLOAT_SPEED, 0f);
         entity.AnimationSetTrigger(entity.ANIM_TRIGGER_SWORD_ATTACK);
         entity.AnimationSetBool(entity.ANIM_BOOL_SWORD_ATTACKING, true);
-        entity.ApplyFacingDirection(InputHandler.MoveInput);
+        UpdateVelocity(PlayerState.MeleeAttack);
         lastMoveInput = InputHandler.MoveInput;
         entity.SetDirtySyncMove();
     }

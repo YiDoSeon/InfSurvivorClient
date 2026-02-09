@@ -20,10 +20,15 @@ public class PlayerStateBase : FiniteState<LocalPlayerController, PlayerState>
     public override void FixedUpdate() { }
     public override void Exit() { }
 
-    protected void CheckMoveInput(PlayerState state)
+    protected void UpdateVelocity(PlayerState state)
     {
         entity.UpdateVelocity(state);
-        entity.ApplyFacingDirection(InputHandler.MoveInput);
+        entity.ApplyFacingDirection(InputHandler.MoveInput);        
+    }
+
+    protected void CheckMoveInput(PlayerState state)
+    {
+        UpdateVelocity(state);
         if (lastMoveInput != InputHandler.MoveInput)
         {
             lastMoveInput = InputHandler.MoveInput;

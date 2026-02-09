@@ -10,7 +10,7 @@ public class PlayerMoveState : PlayerStateBase
     public override void Enter()
     {
         entity.AnimationSetFloat(entity.ANIM_FLOAT_SPEED, entity.LastVelocity.sqrMagnitude);
-        entity.ApplyFacingDirection(InputHandler.MoveInput);
+        UpdateVelocity(PlayerState.Move);
         lastMoveInput = InputHandler.MoveInput;
         entity.SetDirtySyncMove();
     }
