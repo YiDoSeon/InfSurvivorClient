@@ -11,11 +11,28 @@ public class ObjectManager : IObjectService
     private Dictionary<int, GameObject> objects = new Dictionary<int, GameObject>();
     private Dictionary<int, PlayerController> players = new Dictionary<int, PlayerController>();
 
+    public void AddObjects(List<ObjectInfo> objects)
+    {
+        foreach (ObjectInfo info in objects)
+        {
+            Add(info, false);
+        }
+    }
+
+    public void RemoveObjects(List<int> ids)
+    {
+        foreach (int id in ids)
+        {
+            Remove(id);
+        }
+    }
+
     public static GameObjectType GetObjectTypeById(int id)
     {
         int type = (id >> 24) & 0x7F;
         return (GameObjectType)type;
     }
+
     public static int GetObjectIndexById(int id)
     {
         return id & 0x00FFFFFF;
@@ -117,49 +134,74 @@ public class ObjectManager : IObjectService
     {
         Managers.SetObjectService(() => new ObjectManager());
     }
-
+    
+    #region 리소스 로드 및 캐싱 (TODO: ResourceManager 이관)
+    private AssetBundleManifest manifest;
+    private Dictionary<string, AssetBundle> bundleCache = new Dictionary<string, AssetBundle>();
+    private Dictionary<string, UnityEngine.Object> assetCache = new Dictionary<string, UnityEngine.Object>();
     private GameObject playerPrefab;
+
+    public T LoadObject<T>(string bundleName, string assetName) where T : UnityEngine.Object
+    {
+        LoadManifest();
+        string assetKey = $"{bundleName}_{assetName}";
+        if (assetCache.TryGetValue(assetKey, out UnityEngine.Object cachedAsset))
+        {
+            return assetCache[assetKey] as T;
+        }
+
+        AssetBundle bundle = LoadAssetBundle(bundleName);
+        if (bundle == null)
+        {
+            return null;
+        }
+
+        T asset = bundle.LoadAsset<T>(assetName);
+        if (asset != null)
+        {
+            assetCache.Add(assetKey, asset);
+        }
+
+        return asset;
+    }
+
+    private AssetBundle LoadAssetBundle(string bundleName)
+    {
+        if (bundleCache.TryGetValue(bundleName, out AssetBundle bundle))
+        {
+            return bundle;
+        }
+
+        string[] dependencies = manifest.GetAllDependencies(bundleName);
+        foreach (var dep in dependencies)
+        {
+            if (bundleCache.TryGetValue(dep, out AssetBundle depBundle) == false)
+            {
+                depBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, dep));
+                bundleCache.Add(dep, depBundle);
+            }
+        }
+
+        bundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, bundleName));
+        bundleCache.Add(bundleName, bundle);
+        return bundle;
+    }
+
+    private void LoadManifest()
+    {
+        if (manifest != null)
+        {
+            return;
+        }
+        AssetBundle baseBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "StandaloneWindows"));
+        manifest = baseBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+    }
     // 임시
     public void LoadPlayerResource()
     {
-        AssetBundle standaloneWindows = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "StandaloneWindows"));
-        AssetBundleManifest standaloneWindowsManifest = standaloneWindows.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-
-        string[] dependencies = standaloneWindowsManifest.GetAllDependencies("local_character");
-
-        foreach (string dep in dependencies)
-        {
-            Debug.Log(dep);
-        }
-
-        AssetBundle localCharacterManifestBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "local_character"));
-        if (localCharacterManifestBundle == null)
-        {
-            Debug.Log("Failed to load AssetBundle!");
-            return;
-        }
-
-        playerPrefab = localCharacterManifestBundle.LoadAsset<GameObject>("Player");
-        // GameObject player = localCharacterManifestBundle.LoadAsset<GameObject>("Player");
-        // player.transform.position = Vector3.zero;
-        // GameObject.Instantiate(player);
-
-        localCharacterManifestBundle.Unload(false);
+        playerPrefab = LoadObject<GameObject>("prefabs/player", "Player");
     }
 
-    public void AddObjects(List<ObjectInfo> objects)
-    {
-        foreach (ObjectInfo info in objects)
-        {
-            Add(info, false);
-        }
-    }
-
-    public void RemoveObjects(List<int> ids)
-    {
-        foreach (int id in ids)
-        {
-            Remove(id);
-        }
-    }
+    #endregion
 }
