@@ -57,7 +57,7 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
         // TODO: 데이터 로드 방식으로 변경
         hitCollider = new CBoxCollider(
             this,
-            new CVector2(0, 0.5f),
+            new CVector2(0f, 0.5f),
             TargetPosition.ToCVector2(),
             new CVector2(0.6f, 1f));
         hitCollider.Layer = CollisionLayer.Player;
