@@ -22,9 +22,9 @@ public class LocalPlayerController : PlayerController
     private StateMachine<LocalPlayerController, PlayerState> stateMachine;
     public PlayerInputHandler InputHandler { get; private set; }
     public PlayerAnimationEvents AnimationEvents { get; private set; }
-    public CBoxCollider BodyCollider { get; private set; }
+    private CBoxCollider bodyCollider;
+    public override ColliderBase BodyCollider => bodyCollider;
     public CCircleCollider MeleeAttackCollider { get; private set; }
-    private HashSet<CVector2Int> occupiedCells = new HashSet<CVector2Int>();
 
     protected override void Awake()
     {
@@ -37,18 +37,18 @@ public class LocalPlayerController : PlayerController
     {
         base.Start();
         // TODO: 데이터 로드 방식으로 변경
-        BodyCollider = new CBoxCollider(
+        bodyCollider = new CBoxCollider(
             this,
             new CVector2(0f, 0.5f),
-            TargetPosition.ToCVector2(),
+            TargetMovePosition.ToCVector2(),
             new CVector2(0.6f, 1f));
-        BodyCollider.Layer = CollisionLayer.Player;
-        Managers.Collision.RegisterCollider(BodyCollider);
+        bodyCollider.Layer = CollisionLayer.Player;
+        Managers.Collision.RegisterCollider(bodyCollider);
 
         MeleeAttackCollider = new CCircleCollider(
             this,
             new CVector2(0f, 0.5f),
-            TargetPosition.ToCVector2(),
+            TargetMovePosition.ToCVector2(),
             0.75f);
         Managers.Collision.RegisterCollider(MeleeAttackCollider);
 
@@ -59,10 +59,11 @@ public class LocalPlayerController : PlayerController
 
     protected override void OnDisable()
     {
-        Managers.Collision?.UnregisterCollider(BodyCollider);
-        Managers.Collision?.RemoveFromCells(occupiedCells, BodyCollider);
-        Managers.Collision?.UnregisterCollider(MeleeAttackCollider);
-        Managers.Collision?.RemoveFromCells(occupiedCells, MeleeAttackCollider);
+        if (MeleeAttackCollider != null)
+        {
+            Managers.Collision?.UnregisterCollider(MeleeAttackCollider);
+            Managers.Collision?.RemoveFromCells(occupiedCells, MeleeAttackCollider);            
+        }
         base.OnDisable();
     }
 
@@ -77,7 +78,7 @@ public class LocalPlayerController : PlayerController
 
     public override void InitPos(PositionInfo posInfo)
     {
-        transform.position = TargetPosition = posInfo.Pos.ToUnityVector3();
+        transform.position = TargetMovePosition = posInfo.Pos.ToUnityVector3();
         ApplyFacingDirection(posInfo.FacingDir.ToUnityVector2());
         AnimationSetFloat(ANIM_FLOAT_SPEED, 0f);
     }
@@ -112,7 +113,7 @@ public class LocalPlayerController : PlayerController
 
         transform.position = Vector3.MoveTowards(
             transform.position,
-            TargetPosition,
+            TargetMovePosition,
             MoveSpeed * Time.deltaTime
         );
     }
@@ -129,19 +130,12 @@ public class LocalPlayerController : PlayerController
             CreatePendingMove(false);
         }
         UpdateTargetPosition();
-        UpdateOccupiedCells();
         stateMachine.FixedUpdate();
     }
 
     public void UpdateTargetPosition()
     {
-        TargetPosition += LastVelocity * Time.fixedDeltaTime;
-    }
-
-    private void UpdateOccupiedCells()
-    {
-        BodyCollider.UpdatePosition(TargetPosition.ToCVector2());
-        Managers.Collision.UpdateOccupiedCells(BodyCollider, occupiedCells);
+        TargetMovePosition += LastVelocity * Time.fixedDeltaTime;
     }
 
     private void SendMovePacket()
@@ -160,7 +154,7 @@ public class LocalPlayerController : PlayerController
                 SeqNumber = seqNum,
                 PosInfo = new PositionInfo()
                 {
-                    Pos = TargetPosition.ToCVector2(),
+                    Pos = TargetMovePosition.ToCVector2(),
                     Velocity = LastVelocity.ToCVector2(),
                     FacingDir = LastFacingDir.ToCVector2(),
                     FirePressed = InputHandler.FirePressed,
@@ -179,19 +173,19 @@ public class LocalPlayerController : PlayerController
 
     public override void OnUpdateMoveState(S_Move move)
     {
-        float before = TargetPosition.sqrMagnitude;
+        float before = TargetMovePosition.sqrMagnitude;
         pendingMoves.RemoveAll(m =>
         {
             return (int)(move.SeqNumber - m.seqNumber) >= 0;
         });
 
-        TargetPosition = move.PosInfo.Pos.ToUnityVector2();
+        TargetMovePosition = move.PosInfo.Pos.ToUnityVector2();
 
         foreach (var m in pendingMoves)
         {
-            TargetPosition += m.velocity * Time.fixedDeltaTime;
+            TargetMovePosition += m.velocity * Time.fixedDeltaTime;
         }
-        float after = TargetPosition.sqrMagnitude;
+        float after = TargetMovePosition.sqrMagnitude;
         if (before - after > 0.01f)
         {
             Debug.Log("튐");
@@ -216,7 +210,7 @@ public class LocalPlayerController : PlayerController
         if (Application.isPlaying)
         {
             Gizmos.color = Color.cyan;
-            Gizmos.DrawWireCube(BodyCollider.Center.ToUnityVector3(), BodyCollider.Size.ToUnityVector3());
+            Gizmos.DrawWireCube(bodyCollider.Center.ToUnityVector3(), bodyCollider.Size.ToUnityVector3());
 
             // Gizmos.color = Color.red;
             // CVector2 offset = transform.position.ToCVector2() + BodyCollider.Offset + Dir4.ToCVector2() * 0.7f;

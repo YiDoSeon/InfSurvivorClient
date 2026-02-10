@@ -18,7 +18,7 @@ public class PlayerAnimationEvents : MonoBehaviour
 
     private void CheckMeleeAttack()
     {
-        player.MeleeAttackCollider.Position = player.TargetPosition.ToCVector2() + player.Dir4.ToCVector2() * 0.7f;
+        player.MeleeAttackCollider.Position = player.TargetMovePosition.ToCVector2() + player.Dir4.ToCVector2() * 0.8f;
         List<ColliderBase> colliders = Managers.Collision.GetOverlappedColliders(
             player.MeleeAttackCollider,
             targetMask: Shared.Utils.Extensions.CombineMask(Shared.Packet.CollisionLayer.Monster)).ToList();

@@ -8,7 +8,7 @@ using Shared.Physics.Collider;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public abstract class PlayerController : MonoBehaviour, IColliderTrigger
+public abstract class PlayerController : BaseController, IColliderTrigger
 {
     #region 애니메이션 파라미터 (hash)
     public readonly int ANIM_FLOAT_MOVE_X = Animator.StringToHash("MoveX");
@@ -23,57 +23,28 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
     public List<SpriteRenderer> Renderers { get; private set; }
     #endregion
 
-    #region Stats
-    public float MoveSpeed { get; private set; }
-    #endregion
-
     public Vector2 LastFacingDir { get; protected set; } = Vector2.down;
     // x == -1(L), 1(R)
     // y == 1(U), -1(D)
     private Vector2 direction4;
     public Vector2 Dir4 => direction4;
-    public Vector2 LastVelocity { get; protected set; }
-    public Vector2 TargetPosition { get; protected set; }
-
-    #region Network Property
-    public ObjectInfo Info { get; set; } = new ObjectInfo();
-    public int Id
-    {
-        get => Info.ObjectId;
-        set => Info.ObjectId = value;
-    }        
-    #endregion
 
     #region Unity Events
-    protected virtual void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Animators = GetComponentsInChildren<Animator>().ToList();
         Renderers = GetComponentsInChildren<SpriteRenderer>().ToList();
     }
-    protected virtual void Start()
+
+    protected override void Start()
     {
+        base.Start();
         MoveSpeed = 5f;
-    }
-
-    protected virtual void OnEnable() { }
-
-    protected virtual void OnDisable()
-    {
-    }
-
-    protected virtual void Update()
-    {
-    }
-
-    protected virtual void FixedUpdate()
-    {
     }
     #endregion
 
-    public abstract void InitPos(PositionInfo posInfo);
-
-
-    public void ApplyFacingDirection(Vector2 dir)
+    public override void ApplyFacingDirection(Vector2 dir)
     {
         if (dir.sqrMagnitude <= 0.01f)
         {
@@ -133,28 +104,6 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
         Renderers.ForEach(sp => sp.flipX = right);
     }
     #endregion
-
-    #region Network Response Method
-    public virtual void OnUpdateMoveState(S_Move move)
-    {
-
-    }
-    #endregion
-
-    public void OnCustomTriggerEnter(ColliderBase other)
-    {
-
-    }
-
-    public void OnCustomTriggerStay(ColliderBase other)
-    {
-
-    }
-
-    public void OnCustomTriggerExit(ColliderBase other)
-    {
-
-    }
 
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmos()

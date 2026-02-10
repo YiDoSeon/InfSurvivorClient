@@ -10,7 +10,7 @@ public class RemotePlayerController : PlayerController
 
     public override void InitPos(PositionInfo posInfo)
     {
-        transform.position = TargetPosition = posInfo.Pos.ToUnityVector3();
+        transform.position = TargetMovePosition = posInfo.Pos.ToUnityVector3();
         LastVelocity = posInfo.Velocity.ToUnityVector3();
         LastFacingDir = posInfo.FacingDir.ToUnityVector2();
         lastFirePressed = posInfo.FirePressed;
@@ -23,13 +23,13 @@ public class RemotePlayerController : PlayerController
         base.Update();
         float renderTime = Time.time - Managers.Network.GetDisplayPing();
         float elapsedTime = renderTime - lastPacketTime;
-        Vector2 predictedPos = TargetPosition + LastVelocity * elapsedTime;
+        Vector2 predictedPos = TargetMovePosition + LastVelocity * elapsedTime;
         transform.position = Vector3.Lerp(transform.position, predictedPos, 15f * Time.deltaTime);
     }
     
     public override void OnUpdateMoveState(S_Move move)
     {
-        TargetPosition = move.PosInfo.Pos.ToUnityVector2();
+        TargetMovePosition = move.PosInfo.Pos.ToUnityVector2();
         LastVelocity = move.PosInfo.Velocity.ToUnityVector2();
         LastFacingDir = move.PosInfo.FacingDir.ToUnityVector2();
         lastPacketTime = Time.time;
@@ -48,9 +48,9 @@ public class RemotePlayerController : PlayerController
         
         AnimationSetFloat(ANIM_FLOAT_SPEED, LastVelocity.sqrMagnitude);
 
-        if ((TargetPosition - (Vector2)transform.position).sqrMagnitude > 2f * 2f)
+        if ((TargetMovePosition - (Vector2)transform.position).sqrMagnitude > 2f * 2f)
         {
-            transform.position = TargetPosition;
+            transform.position = TargetMovePosition;
         }
     }
 }

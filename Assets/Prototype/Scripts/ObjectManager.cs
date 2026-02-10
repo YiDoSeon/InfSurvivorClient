@@ -11,6 +11,7 @@ public class ObjectManager : IObjectService
     public PlayerController LocalPlayer { get; private set; }
     private Dictionary<int, GameObject> objects = new Dictionary<int, GameObject>();
     private Dictionary<int, PlayerController> players = new Dictionary<int, PlayerController>();
+    private Dictionary<int, EnemyController> enemies = new Dictionary<int, EnemyController>();
 
     public void AddObjects(List<ObjectInfo> objects)
     {
@@ -58,6 +59,8 @@ public class ObjectManager : IObjectService
             if (localPlayer)
             {
                 GameObject go = GameObject.Instantiate(playerPrefab);
+                go.name = info.Name;
+
                 LocalPlayer = go.AddComponent<LocalPlayerController>();
                 LocalPlayer.Info = info;
                 LocalPlayer.InitPos(info.PosInfo);
@@ -69,6 +72,8 @@ public class ObjectManager : IObjectService
             else
             {
                 GameObject go = GameObject.Instantiate(playerPrefab);
+                go.name = info.Name;
+
                 RemotePlayerController rpc = go.AddComponent<RemotePlayerController>();
                 rpc.Info = info;
                 rpc.InitPos(info.PosInfo);
@@ -80,9 +85,16 @@ public class ObjectManager : IObjectService
         else if (objectType == GameObjectType.Monster)
         {
             GameObject monsterPrefab = LoadObject<GameObject>("prefabs/monster", "Slime");
+
             GameObject go = GameObject.Instantiate(monsterPrefab);
             go.name = info.Name;
-            go.transform.position = info.PosInfo.Pos.ToUnityVector2();
+
+            EnemyController enemy = go.AddComponent<EnemyController>();
+            enemy.Info = info;
+            enemy.InitPos(info.PosInfo);
+
+            objects.Add(info.ObjectId, go);
+            enemies.Add(info.ObjectId, enemy);
         }
     }
 
@@ -93,28 +105,23 @@ public class ObjectManager : IObjectService
             return;
         }
 
-        if (objects.ContainsKey(id) == false)
+        GameObjectType objectType = GetObjectTypeById(id);
+
+        switch (objectType)
         {
-            return;
+            case GameObjectType.Player:
+                players.Remove(id);
+                break;
+            case GameObjectType.Monster:
+                enemies.Remove(id);
+                break;
         }
 
-        GameObject go = FindById(id);
-        if (go == null)
+        if (objects.Remove(id, out GameObject go))
         {
-            return;
+            // TODO: 리소스매니저에서 제거처리
+            GameObject.Destroy(go);
         }
-
-        objects.Remove(id);
-
-        PlayerController pc = FindPlayerById(id);
-        if (pc == null)
-        {
-            return;
-        }
-        players.Remove(id);
-
-        // TODO: 리소스매니저에서 제거처리
-        GameObject.Destroy(go);
     }
 
     public void OnMoveHandler(PacketSession session, S_Move movePacket)
@@ -133,11 +140,17 @@ public class ObjectManager : IObjectService
         objects.TryGetValue(id, out GameObject go);
         return go;
     }
-    
+
     public PlayerController FindPlayerById(int id)
     {
         players.TryGetValue(id, out PlayerController player);
         return player;
+    }
+    
+    public EnemyController FindEnemyById(int id)
+    {
+        enemies.TryGetValue(id, out EnemyController enemy);
+        return enemy;
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
