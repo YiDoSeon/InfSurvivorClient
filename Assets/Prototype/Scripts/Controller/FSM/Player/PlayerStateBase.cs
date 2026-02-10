@@ -1,12 +1,7 @@
 using Shared.FSM;
+using Shared.Packet;
 using UnityEngine;
 
-public enum PlayerState
-{
-    Idle,
-    Move,
-    MeleeAttack,
-}
 public class PlayerStateBase : FiniteState<LocalPlayerController, PlayerState>
 {
     protected Vector2 lastMoveInput;

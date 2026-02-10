@@ -1,4 +1,5 @@
 using Shared.FSM;
+using Shared.Packet;
 
 public class PlayerIdleState : PlayerStateBase
 {
