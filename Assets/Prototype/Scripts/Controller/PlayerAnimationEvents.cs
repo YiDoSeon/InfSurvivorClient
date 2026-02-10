@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using InfSurvivor.Runtime.Manager;
 using InfSurvivor.Runtime.Utils;
+using Shared.Packet;
 using Shared.Physics.Collider;
 using Shared.Utils;
 using UnityEngine;
@@ -21,12 +22,14 @@ public class PlayerAnimationEvents : MonoBehaviour
         player.MeleeAttackCollider.Position = player.TargetMovePosition.ToCVector2() + player.Dir4.ToCVector2() * 0.8f;
         List<ColliderBase> colliders = Managers.Collision.GetOverlappedColliders(
             player.MeleeAttackCollider,
-            targetMask: Shared.Utils.Extensions.CombineMask(Shared.Packet.CollisionLayer.Monster)).ToList();
+            targetMask: Shared.Utils.Extensions.CombineMask(Shared.Packet.CollisionLayer.Monster));
         foreach (ColliderBase collider in colliders)
         {
             if (collider.Owner is EnemyController enemy)
             {
                 enemy.OnDamaged(player);
+                C_MeleeAttack meleeAttackPacket = new C_MeleeAttack();
+                Managers.Network.Send(meleeAttackPacket);
             }
         }
     }
