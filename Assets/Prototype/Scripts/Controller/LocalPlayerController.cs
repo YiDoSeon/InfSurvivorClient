@@ -211,10 +211,6 @@ public class LocalPlayerController : PlayerController
         {
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireCube(bodyCollider.Center.ToUnityVector3(), bodyCollider.Size.ToUnityVector3());
-
-            // Gizmos.color = Color.red;
-            // CVector2 offset = transform.position.ToCVector2() + BodyCollider.Offset + Dir4.ToCVector2() * 0.7f;
-            // Gizmos.DrawWireSphere(offset.ToUnityVector3(), 0.75f);
         }
     }
 #endif

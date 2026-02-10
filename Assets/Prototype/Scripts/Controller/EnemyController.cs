@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using InfSurvivor.Runtime.Manager;
 using InfSurvivor.Runtime.Utils;
@@ -10,10 +11,14 @@ public class EnemyController : BaseController
 {
     private CCircleCollider circleCollider;
     public override ColliderBase BodyCollider => circleCollider;
+    private new SpriteRenderer renderer;
+    private MaterialPropertyBlock propBlock;
 
-    public override void InitPos(PositionInfo posInfo)
+    protected override void Awake()
     {
-        transform.position =TargetMovePosition = posInfo.Pos.ToUnityVector2();
+        base.Awake();
+        renderer = GetComponent<SpriteRenderer>();
+        propBlock = new MaterialPropertyBlock();
     }
 
     protected override void Start()
@@ -28,6 +33,11 @@ public class EnemyController : BaseController
         Managers.Collision.RegisterCollider(circleCollider);
     }
 
+    public override void InitPos(PositionInfo posInfo)
+    {
+        transform.position = TargetMovePosition = posInfo.Pos.ToUnityVector2();
+    }
+
     protected override void Update()
     {
         base.Update();
@@ -36,6 +46,32 @@ public class EnemyController : BaseController
             TargetMovePosition,
             MoveSpeed * Time.deltaTime
         );
+    }
+
+    private void PlayHitFlash()
+    {
+        StartCoroutine(FlashRoutine());
+    }
+
+    private IEnumerator FlashRoutine()
+    {
+        SetFlash(1f);
+
+        yield return new WaitForSeconds(0.1f);
+
+        SetFlash(0f);
+    }
+
+    private void SetFlash(float amount)
+    {
+        renderer.GetPropertyBlock(propBlock);
+        propBlock.SetFloat("_FlashAmount", amount);
+        renderer.SetPropertyBlock(propBlock);
+    }
+
+    public void OnHit(BaseController sender)
+    {
+        PlayHitFlash();
     }
 
     private void OnDrawGizmos()

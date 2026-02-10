@@ -24,9 +24,9 @@ public class PlayerAnimationEvents : MonoBehaviour
             targetMask: Shared.Utils.Extensions.CombineMask(Shared.Packet.CollisionLayer.Monster)).ToList();
         foreach (ColliderBase collider in colliders)
         {
-            if (collider.Owner is MonoBehaviour behaviour)
+            if (collider.Owner is EnemyController enemy)
             {
-                Debug.Log(behaviour.name);
+                enemy.OnHit(enemy);
             }
         }
     }
