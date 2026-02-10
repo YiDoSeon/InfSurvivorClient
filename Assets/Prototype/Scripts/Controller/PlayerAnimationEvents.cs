@@ -26,7 +26,7 @@ public class PlayerAnimationEvents : MonoBehaviour
         {
             if (collider.Owner is EnemyController enemy)
             {
-                enemy.OnHit(enemy);
+                enemy.OnDamaged(player);
             }
         }
     }

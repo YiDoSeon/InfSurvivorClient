@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using InfSurvivor.Runtime.Manager;
 using InfSurvivor.Runtime.Utils;
+using Shared.FSM;
 using Shared.Packet;
 using Shared.Packet.Struct;
 using Shared.Physics.Collider;
@@ -13,6 +14,9 @@ public class EnemyController : BaseController
     public override ColliderBase BodyCollider => circleCollider;
     private new SpriteRenderer renderer;
     private MaterialPropertyBlock propBlock;
+    private StateMachine<EnemyController, EnemyState> stateMachine;
+    public Vector2 KnockBackDir;
+    private float knockBackSpeed = 5f;
 
     protected override void Awake()
     {
@@ -31,6 +35,18 @@ public class EnemyController : BaseController
             0.5f);
         circleCollider.Layer = CollisionLayer.Monster;
         Managers.Collision.RegisterCollider(circleCollider);
+
+        MoveSpeed = 3f;
+        CreateStateMachine();
+    }
+
+    private void CreateStateMachine()
+    {
+        stateMachine = new StateMachine<EnemyController, EnemyState>(this);
+        stateMachine.AddState(EnemyState.Idle, new EnemyIdleState(this, stateMachine));
+        stateMachine.AddState(EnemyState.Move, new EnemyMoveState(this, stateMachine));
+        stateMachine.AddState(EnemyState.Damaged, new EnemyDamagedState(this, stateMachine));
+        stateMachine.Initialize(EnemyState.Idle);
     }
 
     public override void InitPos(PositionInfo posInfo)
@@ -41,37 +57,64 @@ public class EnemyController : BaseController
     protected override void Update()
     {
         base.Update();
+        float speed = 0f;
+        if (stateMachine.CurrentStateId == EnemyState.Damaged)
+        {
+            speed = knockBackSpeed;
+        }
+        else if (stateMachine.CurrentStateId == EnemyState.Move)
+        {
+            speed = MoveSpeed;
+        }
         transform.position = Vector3.MoveTowards(
             transform.position,
             TargetMovePosition,
-            MoveSpeed * Time.deltaTime
+            speed * Time.deltaTime
         );
+
+        stateMachine.Update();
     }
 
-    private void PlayHitFlash()
+    protected override void FixedUpdate()
     {
-        StartCoroutine(FlashRoutine());
+        base.FixedUpdate();
+        float speed = 0f;
+        if (stateMachine.CurrentStateId == EnemyState.Damaged)
+        {
+            speed = knockBackSpeed;
+        }
+        else if (stateMachine.CurrentStateId == EnemyState.Move)
+        {
+            speed = MoveSpeed;
+        }
+        TargetMovePosition += LastVelocity * speed * Time.deltaTime;
+        stateMachine.FixedUpdate();
     }
 
-    private IEnumerator FlashRoutine()
+    public void SetVelocity(Vector2 velocity)
     {
-        SetFlash(1f);
-
-        yield return new WaitForSeconds(0.1f);
-
-        SetFlash(0f);
+        LastVelocity = velocity;
     }
 
-    private void SetFlash(float amount)
+    public void SetFlash(float amount)
     {
         renderer.GetPropertyBlock(propBlock);
         propBlock.SetFloat("_FlashAmount", amount);
         renderer.SetPropertyBlock(propBlock);
     }
 
-    public void OnHit(BaseController sender)
+    public void OnDamaged(BaseController sender)
     {
-        PlayHitFlash();
+        if (sender is LocalPlayerController player)
+        {
+            KnockBackDir = player.LastFacingDir;
+        }
+        stateMachine.ChangeState(EnemyState.Damaged);
+    }
+
+    public void KnockBack()
+    {
+        TargetMovePosition += KnockBackDir.normalized * knockBackSpeed * Time.fixedDeltaTime;
     }
 
     private void OnDrawGizmos()
