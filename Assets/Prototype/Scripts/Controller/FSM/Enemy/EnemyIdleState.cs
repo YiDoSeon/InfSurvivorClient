@@ -11,14 +11,9 @@ public class EnemyIdleState : EnemyStateBase
 
     public override void Enter()
     {
-        stateTime = Time.time + Random.Range(0.5f, 1f);
     }
 
-    public override void Update()
+    public override void FixedUpdate()
     {
-        if (stateTime < Time.time)
-        {
-            stateMachine.ChangeState(EnemyState.Move);
-        }
     }
 }

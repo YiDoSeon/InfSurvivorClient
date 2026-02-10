@@ -15,7 +15,7 @@ public class EnemyController : BaseController
     private new SpriteRenderer renderer;
     private MaterialPropertyBlock propBlock;
     private StateMachine<EnemyController, EnemyState> stateMachine;
-    public Vector2 KnockBackDir;
+    public Vector2 KnockBackDir { get; private set; }
     private float knockBackSpeed = 5f;
 
     protected override void Awake()
@@ -108,7 +108,9 @@ public class EnemyController : BaseController
         if (sender is LocalPlayerController player)
         {
             KnockBackDir = player.LastFacingDir;
+            //Debug.Log(KnockBackDir);
         }
+        //Debug.Log(gameObject.name);
         stateMachine.ChangeState(EnemyState.Damaged);
     }
 

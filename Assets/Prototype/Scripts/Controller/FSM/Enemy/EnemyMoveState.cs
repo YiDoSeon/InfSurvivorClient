@@ -11,16 +11,9 @@ public class EnemyMoveState : EnemyStateBase
 
     public override void Enter()
     {
-        stateTime = Time.time + Random.Range(2f, 5f);
-        Vector2 velocity = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
-        entity.SetVelocity(velocity);
     }
 
-    public override void Update()
+    public override void FixedUpdate()
     {
-        if (stateTime < Time.time)
-        {
-            stateMachine.ChangeState(EnemyState.Idle);
-        }
     }
 }

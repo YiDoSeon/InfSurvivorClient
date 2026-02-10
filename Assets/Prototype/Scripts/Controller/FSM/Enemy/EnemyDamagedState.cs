@@ -11,21 +11,26 @@ public class EnemyDamagedState : EnemyStateBase
 
     public override void Enter()
     {
-        time = Time.time + 0.1f;
+        time = 0f;
         entity.SetFlash(1f);
-    }
-
-    public override void Update()
-    {
-        if (time < Time.time)
-        {
-            entity.SetFlash(0f);
-            stateMachine.ChangeState(EnemyState.Idle);
-        }
     }
 
     public override void FixedUpdate()
     {
-        entity.KnockBack();
+        if (time >= 0.1f)
+        {
+            entity.SetFlash(0f);
+            stateMachine.ChangeState(EnemyState.Idle);
+        }
+        else
+        {
+            entity.KnockBack();
+            time += Time.fixedDeltaTime;
+        }
+    }
+
+    public override void Exit()
+    {
+        Debug.Log($"{entity.gameObject.name}: {entity.TargetMovePosition}");
     }
 }
