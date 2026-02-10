@@ -1,16 +1,16 @@
 ManifestFileVersion: 0
 UnityVersion: 6000.3.7f1
-CRC: 3102652164
+CRC: 1953607652
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 326595a6752e81a0b1b0dcb2eb432be1
+    Hash: 686d8d0b0eac741dda99eff254122f98
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 50e981428f7ec02ce1eed022dc491a1f
+    Hash: b1ea0effcbed8acc04c4d22f4916a1f0
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 99b48c36a9013e6ad14d851d8e3b9a5d
+    Hash: df8404da93d32d62bf1ef8551cd4b035
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -41,5 +41,5 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
-- Assets/Prototype/Prefabs/Player/Player.prefab
+- Assets/InfSurvivor/Prefabs/Player/Player.prefab
 Dependencies: []
