@@ -19,6 +19,10 @@ public class PlayerAnimationEvents : MonoBehaviour
 
     private void CheckMeleeAttack()
     {
+        if (player is null)
+        {
+            return;
+        }
         player.MeleeAttackCollider.Position = player.TargetMovePosition.ToCVector2() + player.Dir4.ToCVector2() * 0.8f;
         List<ColliderBase> colliders = Managers.Collision.GetOverlappedColliders(
             player.MeleeAttackCollider,
@@ -37,6 +41,10 @@ public class PlayerAnimationEvents : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
+        if (player is null)
+        {
+            return;
+        }
         Gizmos.DrawWireSphere(player.MeleeAttackCollider.Center.ToUnityVector3(), player.MeleeAttackCollider.Radius);
     }
 #endif
