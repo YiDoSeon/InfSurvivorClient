@@ -114,6 +114,45 @@ public class EnemyController : BaseController
         stateMachine.ChangeState(EnemyState.Damaged);
     }
 
+    // TODO: 네트워크 레이어 분리 작업?
+    private uint lastProcessedSeq = 0;
+    public bool IsConfirmed { get; set; }
+
+    public void OnReceiveDamaged(CVector2 finalPos, uint seq, bool byLocalPlayer)
+    {
+        if (byLocalPlayer)
+        {
+            bool isAfter = seq.IsAfter(lastProcessedSeq);
+            bool isSame = seq.IsSame(lastProcessedSeq);
+
+            if (isAfter == false && isSame == false)
+            {
+                return;
+            }
+
+            if (isSame)
+            {
+                TargetMovePosition = finalPos.ToUnityVector2();
+                IsConfirmed = true;
+                return;
+            }
+            
+            lastProcessedSeq = seq;
+        }
+
+        TargetMovePosition = finalPos.ToUnityVector2();
+        IsConfirmed = true;
+
+        if (stateMachine.CurrentState is EnemyDamagedState damagedState)
+        {
+            damagedState.ResetDuration();
+        }
+        else
+        {
+            stateMachine.ChangeState(EnemyState.Damaged);            
+        }
+    }
+
     public void KnockBack()
     {
         TargetMovePosition += KnockBackDir.normalized * knockBackSpeed * Time.fixedDeltaTime;
@@ -139,5 +178,4 @@ public class EnemyController : BaseController
             Gizmos.DrawWireCube(worldPos, Vector2.one * cellSize);
         }
     }
-
 }

@@ -45,6 +45,8 @@ public class PacketManager
         packetProcessors.Add(PacketId.S_MOVE, PacketHandler.S_MoveHandler);
         rawPacketHandlers.Add(PacketId.S_TIME_SYNC, MakePacket<S_TimeSync>);
         packetProcessors.Add(PacketId.S_TIME_SYNC, PacketHandler.S_TimeSyncHandler);
+        rawPacketHandlers.Add(PacketId.S_MELEE_ATTACK, MakePacket<S_MeleeAttack>);
+        packetProcessors.Add(PacketId.S_MELEE_ATTACK, PacketHandler.S_MeleeAttackHandler);
     }
 
     public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer)

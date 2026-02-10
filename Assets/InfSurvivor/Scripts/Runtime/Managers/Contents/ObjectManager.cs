@@ -17,5 +17,6 @@ namespace InfSurvivor.Runtime.Manager
         public void RemoveObjects(List<int> ids);
         public void LoadPlayerResource();
         public void OnMoveHandler(PacketSession session, S_Move movePacket);
+        public void OnMeleeAttackHandler(PacketSession session, S_MeleeAttack meleeAttackPacket);
     }
 }

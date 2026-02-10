@@ -15,6 +15,11 @@ public class EnemyDamagedState : EnemyStateBase
         entity.SetFlash(1f);
     }
 
+    public void ResetDuration()
+    {
+        time = 0f;
+    }
+
     public override void FixedUpdate()
     {
         if (time >= 0.1f)
@@ -24,13 +29,17 @@ public class EnemyDamagedState : EnemyStateBase
         }
         else
         {
-            entity.KnockBack();
+            if (entity.IsConfirmed == false)
+            {
+                entity.KnockBack();                
+            }
             time += Time.fixedDeltaTime;
         }
     }
 
     public override void Exit()
     {
+        entity.SetFlash(0f);
         Debug.Log($"{entity.gameObject.name}: {entity.TargetMovePosition}");
     }
 }

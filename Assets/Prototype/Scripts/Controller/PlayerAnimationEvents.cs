@@ -23,19 +23,7 @@ public class PlayerAnimationEvents : MonoBehaviour
         {
             return;
         }
-        player.MeleeAttackCollider.Position = player.TargetMovePosition.ToCVector2() + player.Dir4.ToCVector2() * 0.8f;
-        List<ColliderBase> colliders = Managers.Collision.GetOverlappedColliders(
-            player.MeleeAttackCollider,
-            targetMask: Shared.Utils.Extensions.CombineMask(Shared.Packet.CollisionLayer.Monster));
-        foreach (ColliderBase collider in colliders)
-        {
-            if (collider.Owner is EnemyController enemy)
-            {
-                enemy.OnDamaged(player);
-                C_MeleeAttack meleeAttackPacket = new C_MeleeAttack();
-                Managers.Network.Send(meleeAttackPacket);
-            }
-        }
+        player.CheckMeleeAttack();
     }
 
 #if UNITY_EDITOR

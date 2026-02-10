@@ -16,7 +16,8 @@ public class LocalPlayerController : PlayerController
         public Vector2 velocity;
     }
     private bool needsSyncMove;
-    private uint seqNumber = 0;
+    private uint moveSeq = 0;
+    public uint meleeAttackSeq = 0;
     private List<PendingMove> pendingMoves = new List<PendingMove>();
 
     private StateMachine<LocalPlayerController, PlayerState> stateMachine;
@@ -146,7 +147,7 @@ public class LocalPlayerController : PlayerController
 
     private void CreatePendingMove(bool needsSync)
     {
-        uint seqNum = this.seqNumber;
+        uint seqNum = this.moveSeq;
         if (needsSync)
         {
             C_Move movePacket = new C_Move()
@@ -167,7 +168,7 @@ public class LocalPlayerController : PlayerController
             seqNumber = seqNum,
             velocity = LastVelocity
         };
-        seqNumber++;
+        moveSeq++;
         pendingMoves.Add(move);
     }
 
@@ -176,7 +177,7 @@ public class LocalPlayerController : PlayerController
         float before = TargetMovePosition.sqrMagnitude;
         pendingMoves.RemoveAll(m =>
         {
-            return (int)(move.SeqNumber - m.seqNumber) >= 0;
+            return move.SeqNumber.IsAfterOrEqual(m.seqNumber);
         });
 
         TargetMovePosition = move.PosInfo.Pos.ToUnityVector2();
@@ -201,6 +202,49 @@ public class LocalPlayerController : PlayerController
             SetDirtySyncMove();
         }
     }
+    
+    #region MeleeAttack
+    public void CheckMeleeAttack()
+    {
+        MeleeAttackCollider.Position = TargetMovePosition.ToCVector2() + Dir4.ToCVector2() * 0.8f;
+
+        List<ColliderBase> colliders = Managers.Collision.GetOverlappedColliders(
+            MeleeAttackCollider,
+            targetMask: Shared.Utils.Extensions.CombineMask(CollisionLayer.Monster));
+        SendMeleeAttackPacket();
+        foreach (ColliderBase collider in colliders)
+        {
+            if (collider.Owner is EnemyController enemy)
+            {
+                enemy.OnDamaged(this);
+            }
+        }
+    }
+    public void SendMeleeAttackPacket()
+    {
+        C_MeleeAttack meleeAttackPacket = new C_MeleeAttack()
+        {
+            SeqNumber = meleeAttackSeq++
+        };
+        Managers.Network.Send(meleeAttackPacket);
+    }
+
+    public void OnMeleeAttackConfirm(S_MeleeAttack meleeAttack)
+    {
+        ObjectManager objectManager = (ObjectManager)Managers.Object;
+        bool byLocalPlayer = meleeAttack.AttackerId == Id;
+        foreach (DamagedElement target in meleeAttack.Targets)
+        {
+            EnemyController ec = objectManager.FindEnemyById(target.EnemyId);
+            if (ec == null)
+            {
+                continue;
+            }
+            //Debug.Log($"{ec.name} - {target.FinalPos}");
+            ec.OnReceiveDamaged(target.FinalPos, meleeAttack.SeqNumber, byLocalPlayer);
+        }
+    }
+    #endregion
 
 #if UNITY_EDITOR
     protected override void OnDrawGizmos()

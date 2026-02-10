@@ -50,4 +50,10 @@ public class PacketHandler
         S_Move movePacket = (S_Move)packet;
         Managers.Object.OnMoveHandler(session, movePacket);
     }
+
+    public static void S_MeleeAttackHandler(PacketSession session, IPacket packet)
+    {
+        S_MeleeAttack meleeAttackPacket = (S_MeleeAttack)packet;
+        Managers.Object.OnMeleeAttackHandler(session, meleeAttackPacket);
+    }
 }

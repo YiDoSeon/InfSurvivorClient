@@ -52,5 +52,25 @@ namespace InfSurvivor.Runtime.Utils
             return new CVector2(vector.x, vector.y);
         }
         #endregion
+
+        public static bool IsAfter(this uint seq, uint compare)
+        {
+            return (int)(seq - compare) > 0;
+        }
+
+        public static bool IsAfterOrEqual(this uint seq, uint compare)
+        {
+            return (int)(seq - compare) >= 0;
+        }
+
+        public static bool IsBefore(this uint seq, uint compare)
+        {
+            return (int)(seq - compare) < 0;
+        }
+        
+        public static bool IsSame(this uint seq, uint compare)
+        {
+            return seq == compare;
+        }
     }
 }

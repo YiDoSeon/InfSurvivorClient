@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class ObjectManager : IObjectService
 {
-    public PlayerController LocalPlayer { get; private set; }
+    public LocalPlayerController LocalPlayer { get; private set; }
     private Dictionary<int, GameObject> objects = new Dictionary<int, GameObject>();
     private Dictionary<int, PlayerController> players = new Dictionary<int, PlayerController>();
     private Dictionary<int, EnemyController> enemies = new Dictionary<int, EnemyController>();
@@ -68,6 +68,8 @@ public class ObjectManager : IObjectService
                 objects.Add(info.ObjectId, go);
                 players.Add(info.ObjectId, LocalPlayer);
                 Camera.main.transform.parent = go.transform;
+                Vector3 cameraLocalPos = Camera.main.transform.localPosition;
+                Camera.main.transform.localPosition = new Vector3(0f, 0f, cameraLocalPos.z);
             }
             else
             {
@@ -133,6 +135,16 @@ public class ObjectManager : IObjectService
         }
 
         pc.OnUpdateMoveState(movePacket);
+    }
+
+    public void OnMeleeAttackHandler(PacketSession session, S_MeleeAttack meleeAttackPacket)
+    {
+        if (LocalPlayer == null)
+        {
+            return;
+        }
+
+        LocalPlayer.OnMeleeAttackConfirm(meleeAttackPacket);
     }
 
     public GameObject FindById(int id)
