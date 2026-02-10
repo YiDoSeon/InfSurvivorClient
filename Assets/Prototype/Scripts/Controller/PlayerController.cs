@@ -27,7 +27,6 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
     public float MoveSpeed { get; private set; }
     #endregion
 
-    private HashSet<CVector2Int> occupiedCells = new HashSet<CVector2Int>();
     public Vector2 LastFacingDir { get; protected set; } = Vector2.down;
     // x == -1(L), 1(R)
     // y == 1(U), -1(D)
@@ -35,7 +34,6 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
     public Vector2 Dir4 => direction4;
     public Vector2 LastVelocity { get; protected set; }
     public Vector2 TargetPosition { get; protected set; }
-    protected CBoxCollider hitCollider;
 
     #region Network Property
     public ObjectInfo Info { get; set; } = new ObjectInfo();
@@ -54,14 +52,6 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
     }
     protected virtual void Start()
     {
-        // TODO: 데이터 로드 방식으로 변경
-        hitCollider = new CBoxCollider(
-            this,
-            new CVector2(0f, 0.5f),
-            TargetPosition.ToCVector2(),
-            new CVector2(0.6f, 1f));
-        hitCollider.Layer = CollisionLayer.Player;
-        Managers.Collision.RegisterCollider(hitCollider);
         MoveSpeed = 5f;
     }
 
@@ -69,8 +59,6 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
 
     protected virtual void OnDisable()
     {
-        Managers.Collision?.UnregisterCollider(hitCollider);
-        Managers.Collision?.RemoveFromCells(occupiedCells, hitCollider);
     }
 
     protected virtual void Update()
@@ -79,17 +67,10 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
 
     protected virtual void FixedUpdate()
     {
-        UpdateOccupiedCells();
     }
     #endregion
 
     public abstract void InitPos(PositionInfo posInfo);
-
-    private void UpdateOccupiedCells()
-    {
-        hitCollider.UpdatePosition(TargetPosition.ToCVector2());
-        Managers.Collision.UpdateOccupiedCells(hitCollider, occupiedCells);
-    }
 
 
     public void ApplyFacingDirection(Vector2 dir)
@@ -178,8 +159,6 @@ public abstract class PlayerController : MonoBehaviour, IColliderTrigger
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmos()
     {
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireCube(hitCollider.Center.ToUnityVector3(), hitCollider.Size.ToUnityVector3());
     }
 #endif
 }

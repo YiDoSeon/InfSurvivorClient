@@ -4,6 +4,7 @@ using InfSurvivor.Runtime.Manager;
 using InfSurvivor.Runtime.Utils;
 using Shared.Packet;
 using Shared.Packet.Struct;
+using Shared.Physics.Collider;
 using UnityEngine;
 
 public class LocalPlayerController : PlayerController
@@ -20,6 +21,9 @@ public class LocalPlayerController : PlayerController
     private StateMachine<LocalPlayerController, PlayerState> stateMachine;
     public PlayerInputHandler InputHandler { get; private set; }
     public PlayerAnimationEvents AnimationEvents { get; private set; }
+    public CBoxCollider BodyCollider { get; private set; }
+    public CCircleCollider MeleeAttackCollider { get; private set; }
+    private HashSet<CVector2Int> occupiedCells = new HashSet<CVector2Int>();
 
     protected override void Awake()
     {
@@ -31,9 +35,34 @@ public class LocalPlayerController : PlayerController
     protected override void Start()
     {
         base.Start();
+        // TODO: 데이터 로드 방식으로 변경
+        BodyCollider = new CBoxCollider(
+            this,
+            new CVector2(0f, 0.5f),
+            TargetPosition.ToCVector2(),
+            new CVector2(0.6f, 1f));
+        BodyCollider.Layer = CollisionLayer.Player;
+        Managers.Collision.RegisterCollider(BodyCollider);
+
+        MeleeAttackCollider = new CCircleCollider(
+            this,
+            new CVector2(0f, 0.5f),
+            TargetPosition.ToCVector2(),
+            0.75f);
+        Managers.Collision.RegisterCollider(MeleeAttackCollider);
+
         AnimationEvents.SetPlayer(this);
         CreateStateMachine();
         StartCoroutine(CoSyncMovement());
+    }
+
+    protected override void OnDisable()
+    {
+        Managers.Collision?.UnregisterCollider(BodyCollider);
+        Managers.Collision?.RemoveFromCells(occupiedCells, BodyCollider);
+        Managers.Collision?.UnregisterCollider(MeleeAttackCollider);
+        Managers.Collision?.RemoveFromCells(occupiedCells, MeleeAttackCollider);
+        base.OnDisable();
     }
 
     private void CreateStateMachine()
@@ -99,12 +128,19 @@ public class LocalPlayerController : PlayerController
             CreatePendingMove(false);
         }
         UpdateTargetPosition();
+        UpdateOccupiedCells();
         stateMachine.FixedUpdate();
     }
 
     public void UpdateTargetPosition()
     {
         TargetPosition += LastVelocity * Time.fixedDeltaTime;
+    }
+
+    private void UpdateOccupiedCells()
+    {
+        BodyCollider.UpdatePosition(TargetPosition.ToCVector2());
+        Managers.Collision.UpdateOccupiedCells(BodyCollider, occupiedCells);
     }
 
     private void SendMovePacket()
@@ -178,9 +214,12 @@ public class LocalPlayerController : PlayerController
 
         if (Application.isPlaying)
         {
-            Gizmos.color = Color.red;
-            CVector2 offset = transform.position.ToCVector2() + hitCollider.Offset + Dir4.ToCVector2() * 0.7f;
-            Gizmos.DrawWireSphere(offset.ToUnityVector3(), 0.75f);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(BodyCollider.Center.ToUnityVector3(), BodyCollider.Size.ToUnityVector3());
+
+            // Gizmos.color = Color.red;
+            // CVector2 offset = transform.position.ToCVector2() + BodyCollider.Offset + Dir4.ToCVector2() * 0.7f;
+            // Gizmos.DrawWireSphere(offset.ToUnityVector3(), 0.75f);
         }
     }
 #endif
