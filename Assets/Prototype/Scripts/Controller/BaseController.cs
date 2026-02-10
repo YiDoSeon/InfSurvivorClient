@@ -41,8 +41,11 @@ public abstract class BaseController : MonoBehaviour, IColliderTrigger
     protected virtual void Update() { }
     protected virtual void FixedUpdate()
     {
-        BodyCollider.UpdatePosition(TargetMovePosition.ToCVector2());
-        Managers.Collision.UpdateOccupiedCells(BodyCollider, occupiedCells);
+        if (BodyCollider != null)
+        {
+            BodyCollider.UpdatePosition(TargetMovePosition.ToCVector2());
+            Managers.Collision.UpdateOccupiedCells(BodyCollider, occupiedCells);            
+        }
     }
     #endregion
 
