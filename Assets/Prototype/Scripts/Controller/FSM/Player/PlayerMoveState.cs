@@ -1,3 +1,4 @@
+using Shared.FSM;
 using UnityEngine;
 
 public class PlayerMoveState : PlayerStateBase

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using InfSurvivor.Runtime.Manager;
 using InfSurvivor.Runtime.Utils;
+using Shared.FSM;
 using Shared.Packet;
 using Shared.Packet.Struct;
 using Shared.Physics.Collider;
