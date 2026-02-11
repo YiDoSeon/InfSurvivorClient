@@ -1,5 +1,9 @@
 # InfSurvivor Client
 
+## 서버 Github
+
+* **Server**: [InfSurvivor](https://github.com/YiDoSeon/InfSurvivor)
+
 ## 🎨 Credits & Assets
 
 이 프로젝트는 아래의 훌륭한 무료 에셋들을 사용하여 제작되었습니다. 각 에셋의 저작권은 원저작자에게 있습니다.
