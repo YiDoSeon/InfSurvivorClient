@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using InfSurvivor.Runtime.Manager;
 using Shared.Session;
 using UnityEngine;
 
@@ -46,8 +47,10 @@ namespace InfSurvivor.Runtime.Network
             }
             catch (System.Exception e)
             {
-                Debug.Log($"{nameof(RegisterConnect)} 실패: {e}");
-                throw;
+                Managers.Network.PushEvent(() =>
+                {
+                    Managers.Network.OnConnectFailed($"{nameof(RegisterConnect)} Failed: {e}");
+                });
             }
         }
 
@@ -63,13 +66,18 @@ namespace InfSurvivor.Runtime.Network
                 }
                 else
                 {
-                    Debug.Log($"{nameof(OnConnectCompleted)} 실패: {args.SocketError}");
+                    Managers.Network.PushEvent(() =>
+                    {
+                        Managers.Network.OnConnectFailed($"{nameof(OnConnectCompleted)} Failed: {args.SocketError}");
+                    });
                 }
-
             }
             catch (System.Exception e)
             {
-                Debug.Log($"{nameof(OnConnectCompleted)} 실패: {e}");
+                Managers.Network.PushEvent(() =>
+                {
+                    Managers.Network.OnConnectFailed($"{nameof(OnConnectCompleted)} Failed: {e}");
+                });
             }
         }
     }

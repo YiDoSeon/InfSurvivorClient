@@ -14,22 +14,31 @@ namespace InfSurvivor.Runtime.Manager
         private ServerSession serverSession = new ServerSession();
         private float lastTimeRequestTimeSync;
         public bool IsSessionValidated = false;
+        public event Action onConnectSuccess;
+        public event Action<string> onConnectFailed;
+        public Queue<Action> ExecuteQueue = new Queue<Action>();
         public void Init()
         {
-            ConnectToGame();
             Application.quitting += OnQuitting;
         }
 
-        public void ConnectToGame()
+        public void ConnectToGame(string ip, int port)
         {
-            IPAddress ipAddr = IPAddress.Parse("127.0.0.1");
-            IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
+            IPAddress ipAddr = IPAddress.Parse(ip);
+            IPEndPoint endPoint = new IPEndPoint(ipAddr, port);
             Connector connector = new Connector();
             connector.Connect(endPoint, () => serverSession);
         }
 
+        public void OnConnectFailed(string reason)
+        {
+            onConnectFailed?.Invoke(reason);
+        }
+
         public void OnDestroy()
         {
+            onConnectSuccess = null;
+            onConnectFailed = null;
             Close();
         }
 
@@ -56,6 +65,7 @@ namespace InfSurvivor.Runtime.Manager
 
         public void Update()
         {
+            ExecuteEvents();
             ProcessPackets();
             if (Time.realtimeSinceStartup > lastTimeRequestTimeSync + HEART_BEAT_SECONDS)
             {
@@ -83,9 +93,28 @@ namespace InfSurvivor.Runtime.Manager
             }
         }
 
-        public void Send<TPacket>(TPacket packet) where TPacket: IPacket
+        public void Send<TPacket>(TPacket packet) where TPacket : IPacket
         {
             serverSession.Send(packet);
+        }
+
+        public void PushEvent(Action action)
+        {
+            lock (ExecuteQueue)
+            {
+                ExecuteQueue.Enqueue(action);
+            }
+        }
+        
+        public void ExecuteEvents()
+        {
+            lock (ExecuteQueue)
+            {
+                while (ExecuteQueue.Count > 0)
+                {
+                    ExecuteQueue.Dequeue()?.Invoke();
+                }
+            }
         }
 
         #region 시간 관련
@@ -99,7 +128,7 @@ namespace InfSurvivor.Runtime.Manager
         private bool isTimeSyncWarmupDone;        
         private int warmupCount;
         private bool isSynced = false;
-        
+
         public void RequestTimeSync()
         {
             if (IsSessionValidated)
@@ -112,6 +141,7 @@ namespace InfSurvivor.Runtime.Manager
                 Send(timeSyncPacket);
             }
         }
+        
         public void HandleSyncTime(S_TimeSync packet)
         {
             if (isTimeSyncWarmupDone == false)
@@ -129,7 +159,8 @@ namespace InfSurvivor.Runtime.Manager
 
             if (isSynced == false)
             {
-                Debug.Log("시간 동기화 완료.");
+                onConnectSuccess?.Invoke();
+                //Debug.Log("시간 동기화 완료.");
             }
 
             long t1 = packet.ClientTime; // 패킷을 보낸 시간
