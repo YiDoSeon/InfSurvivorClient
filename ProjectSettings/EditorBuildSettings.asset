@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/InfSurvivor/Scenes/MainScene.unity
+    guid: 1c152eafe0633364096d6aa3c1035692
+  - enabled: 1
     path: Assets/InfSurvivor/Scenes/BattleScene.unity
     guid: 9c8605bdb085bf44cad0a2fd3cf25c2e
   m_configObjects:
