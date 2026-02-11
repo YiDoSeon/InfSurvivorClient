@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
 using InfSurvivor.Runtime.Utils;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace InfSurvivor.Runtime
+namespace InfSurvivor.Runtime.UI
 {
     public abstract class UIBase : MonoBehaviour
     {

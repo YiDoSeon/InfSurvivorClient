@@ -1,9 +1,8 @@
 using InfSurvivor.Runtime.Manager;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
-namespace InfSurvivor.Runtime
+namespace InfSurvivor.Runtime.UI
 {
     public class LoginUI : UIBase
     {
