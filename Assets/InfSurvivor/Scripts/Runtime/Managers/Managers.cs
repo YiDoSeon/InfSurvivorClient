@@ -26,7 +26,7 @@ namespace InfSurvivor.Runtime.Manager
                         GameObject go = new GameObject();
                         instance = go.AddComponent<Managers>();
                     }
-                    
+
                     if (instance == null)
                     {
                         instance = manager;
@@ -38,6 +38,12 @@ namespace InfSurvivor.Runtime.Manager
                 return instance;
             }
         }
+
+        /// <summary>
+        /// 객체 파괴시 OnDestroy 처리를 할지 여부 <br/>
+        /// 첫 번째 객체 이후에 발견되는 객체들에 대해서는 OnDestroy 처리를 하지 않도록 하기 위한 플래그 <br/>
+        /// </summary>
+        private bool canProcessDestroy = true;
         #endregion
 
         #region Contents
@@ -53,8 +59,10 @@ namespace InfSurvivor.Runtime.Manager
 
         #region Core
         private ResourceManager resource = new ResourceManager();
+        private SceneManagerEx scene = new SceneManagerEx();
 
         public static ResourceManager Resource => Instance?.resource;
+        public static SceneManagerEx Scene => Instance?.scene;
         #endregion
 
         #region Unity 이벤트 함수
@@ -71,12 +79,17 @@ namespace InfSurvivor.Runtime.Manager
             }
             else if (instance != this)
             {
+                canProcessDestroy = false;
                 Destroy(gameObject);
             }
         }
 
         private void OnDestroy()
         {
+            if (canProcessDestroy == false)
+            {
+                return;
+            }
             Network.OnDestroy();
             instance = null;
             Initialized = false;
@@ -100,9 +113,14 @@ namespace InfSurvivor.Runtime.Manager
             Collision?.Init();
             Network?.Init();
         }
+        
+        public static void Clear()
+        {
+            Scene.Clear();
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        public static void Clear()
+        public static void ClearSingleton()
         {
             instance = null;
             Initialized = false;

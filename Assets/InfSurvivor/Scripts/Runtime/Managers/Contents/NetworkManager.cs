@@ -73,13 +73,13 @@ namespace InfSurvivor.Runtime.Manager
             }
 
             offset = Mathf.Lerp(offset, targetOffset, 0.05f);
-            
-            if (IsSessionValidated && Keyboard.current.enterKey.wasPressedThisFrame)
-            {
-                C_EnterGame enterGamePacket = new C_EnterGame();
-                enterGamePacket.Name = "플레이어";
-                Send(enterGamePacket);
-            }
+        }
+        
+        public void EnterGame()
+        {
+            C_EnterGame enterGamePacket = new C_EnterGame();
+            enterGamePacket.Name = "플레이어";
+            Send(enterGamePacket);
         }
 
         private void ProcessPackets()

@@ -86,9 +86,7 @@ namespace InfSurvivor.Runtime.Manager
             }
             else if (objectType == GameObjectType.Monster)
             {
-                GameObject monsterPrefab = Managers.Resource.Instantiate("prefabs/monster", "Slime");
-
-                GameObject go = GameObject.Instantiate(monsterPrefab);
+                GameObject go = Managers.Resource.Instantiate("prefabs/monster", "Slime");
                 go.name = info.Name;
 
                 EnemyController enemy = go.AddComponent<EnemyController>();

@@ -85,6 +85,7 @@ namespace InfSurvivor.Runtime.UI
             //Debug.Log("연결 성공!");
             Managers.Network.onConnectSuccess -= OnNetworkConnectSuccess;
             Managers.Network.onConnectFailed -= OnNetworkConnectFailed;
+            Managers.Scene.LoadScene(Utils.Defines.SceneType.BattleScene);
         }
         
         public void OnNetworkConnectFailed(string reason)
