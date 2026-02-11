@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 35145671}
   - component: {fileID: 35145670}
   m_Layer: 5
-  m_Name: ConnectBtn
+  m_Name: Connect_Btn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -964,6 +964,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 937682803}
+  - component: {fileID: 937682804}
   m_Layer: 5
   m_Name: LoginUI
   m_TagString: Untagged
@@ -991,6 +992,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &937682804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 937682802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d464a99f84c64f45bc77f3b5f139494, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: InfSurvivor.Runtime::InfSurvivor.Runtime.LoginUI
 --- !u!1 &970710404
 GameObject:
   m_ObjectHideFlags: 0
@@ -1440,7 +1453,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -22.074486}
+  m_AnchoredPosition: {x: 0, y: -22.074478}
   m_SizeDelta: {x: -96.079, y: -143.45103}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1226400577
@@ -1495,7 +1508,7 @@ GameObject:
   - component: {fileID: 1261086626}
   - component: {fileID: 1261086625}
   m_Layer: 5
-  m_Name: IPInputField
+  m_Name: IP_InputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2034,7 +2047,7 @@ GameObject:
   - component: {fileID: 1493055611}
   - component: {fileID: 1493055610}
   m_Layer: 5
-  m_Name: PortInputField
+  m_Name: Port_InputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2532,7 +2545,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 25.9}
+  m_AnchoredPosition: {x: 0, y: 25.900002}
   m_SizeDelta: {x: -25.854, y: -98.247}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2059585116
