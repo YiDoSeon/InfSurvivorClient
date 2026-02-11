@@ -9297,6 +9297,50 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6323616739901478145, guid: ea418c003ed241c492ae4bf7204c3e3d, type: 3}
   m_PrefabInstance: {fileID: 6323616740863928274}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &999982681
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 999982683}
+  - component: {fileID: 999982682}
+  m_Layer: 0
+  m_Name: '@Managers'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &999982682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999982681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 687a2e26d1094cc4cb31f1c5a508f8c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: InfSurvivor.Runtime::InfSurvivor.Runtime.Manager.Managers
+--- !u!4 &999982683
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999982681}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1008478595 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1584029877811917420, guid: 368a83de40104a47845dbfcddd24cf1c, type: 3}
@@ -16384,3 +16428,4 @@ SceneRoots:
   - {fileID: 65769408}
   - {fileID: 1465007155}
   - {fileID: 1181010385}
+  - {fileID: 999982683}

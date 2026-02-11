@@ -42,7 +42,7 @@ namespace InfSurvivor.Runtime.Controller.FSM
         public override void Exit()
         {
             entity.SetFlash(0f);
-            Debug.Log($"{entity.gameObject.name}: {entity.TargetMovePosition}");
+            //Debug.Log($"{entity.gameObject.name}: {entity.TargetMovePosition}");
         }
     }    
 }

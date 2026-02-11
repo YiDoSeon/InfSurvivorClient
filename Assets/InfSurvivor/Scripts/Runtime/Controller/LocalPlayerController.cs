@@ -234,11 +234,10 @@ namespace InfSurvivor.Runtime.Controller
 
         public void OnMeleeAttackConfirm(S_MeleeAttack meleeAttack)
         {
-            ObjectManager objectManager = (ObjectManager)Managers.Object;
             bool byLocalPlayer = meleeAttack.AttackerId == Id;
             foreach (DamagedElement target in meleeAttack.Targets)
             {
-                EnemyController ec = objectManager.FindEnemyById(target.EnemyId);
+                EnemyController ec = Managers.Object.FindEnemyById(target.EnemyId);
                 if (ec == null)
                 {
                     continue;

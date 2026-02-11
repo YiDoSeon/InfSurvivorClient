@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using InfSurvivor.Runtime.Controller;
 using Shared.Packet;
 using Shared.Session;
@@ -59,7 +58,7 @@ namespace InfSurvivor.Runtime.Manager
             {
                 if (localPlayer)
                 {
-                    GameObject go = GameObject.Instantiate(playerPrefab);
+                    GameObject go = Managers.Resource.Instantiate("prefabs/player", "Player");
                     go.name = info.Name;
 
                     LocalPlayer = go.AddComponent<LocalPlayerController>();
@@ -74,7 +73,7 @@ namespace InfSurvivor.Runtime.Manager
                 }
                 else
                 {
-                    GameObject go = GameObject.Instantiate(playerPrefab);
+                    GameObject go = Managers.Resource.Instantiate("prefabs/player", "Player");
                     go.name = info.Name;
 
                     RemotePlayerController rpc = go.AddComponent<RemotePlayerController>();
@@ -87,7 +86,7 @@ namespace InfSurvivor.Runtime.Manager
             }
             else if (objectType == GameObjectType.Monster)
             {
-                GameObject monsterPrefab = LoadObject<GameObject>("prefabs/monster", "Slime");
+                GameObject monsterPrefab = Managers.Resource.Instantiate("prefabs/monster", "Slime");
 
                 GameObject go = GameObject.Instantiate(monsterPrefab);
                 go.name = info.Name;
@@ -122,8 +121,7 @@ namespace InfSurvivor.Runtime.Manager
 
             if (objects.Remove(id, out GameObject go))
             {
-                // TODO: 리소스매니저에서 제거처리
-                GameObject.Destroy(go);
+                Managers.Resource.Destroy(go);
             }
         }
 
@@ -165,75 +163,5 @@ namespace InfSurvivor.Runtime.Manager
             enemies.TryGetValue(id, out EnemyController enemy);
             return enemy;
         }
-
-        #region 리소스 로드 및 캐싱 (TODO: ResourceManager 이관)
-        private AssetBundleManifest manifest;
-        private Dictionary<string, AssetBundle> bundleCache = new Dictionary<string, AssetBundle>();
-        private Dictionary<string, UnityEngine.Object> assetCache = new Dictionary<string, UnityEngine.Object>();
-        private GameObject playerPrefab;
-
-        public T LoadObject<T>(string bundleName, string assetName) where T : UnityEngine.Object
-        {
-            LoadManifest();
-            string assetKey = $"{bundleName}_{assetName}";
-            if (assetCache.TryGetValue(assetKey, out UnityEngine.Object cachedAsset))
-            {
-                return assetCache[assetKey] as T;
-            }
-
-            AssetBundle bundle = LoadAssetBundle(bundleName);
-            if (bundle == null)
-            {
-                return null;
-            }
-
-            T asset = bundle.LoadAsset<T>(assetName);
-            if (asset != null)
-            {
-                assetCache.Add(assetKey, asset);
-            }
-
-            return asset;
-        }
-
-        private AssetBundle LoadAssetBundle(string bundleName)
-        {
-            if (bundleCache.TryGetValue(bundleName, out AssetBundle bundle))
-            {
-                return bundle;
-            }
-
-            string[] dependencies = manifest.GetAllDependencies(bundleName);
-            foreach (var dep in dependencies)
-            {
-                if (bundleCache.TryGetValue(dep, out AssetBundle depBundle) == false)
-                {
-                    depBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, dep));
-                    bundleCache.Add(dep, depBundle);
-                }
-            }
-
-            bundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, bundleName));
-            bundleCache.Add(bundleName, bundle);
-            return bundle;
-        }
-
-        private void LoadManifest()
-        {
-            if (manifest != null)
-            {
-                return;
-            }
-            AssetBundle baseBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "StandaloneWindows"));
-            manifest = baseBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-
-        }
-        // 임시
-        public void LoadPlayerResource()
-        {
-            playerPrefab = LoadObject<GameObject>("prefabs/player", "Player");
-        }
-
-        #endregion
     }
 }

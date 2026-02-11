@@ -1,4 +1,3 @@
-using System;
 using Shared.Physics;
 using UnityEngine;
 
@@ -44,12 +43,18 @@ namespace InfSurvivor.Runtime.Manager
         #region Contents
         private CollisionWorld collision = new CollisionWorld();
         private NetworkManager network = new NetworkManager();
-        private ObjectManager @object;
+        private ObjectManager @object = new ObjectManager();
 
         public static CollisionWorld Collision => Instance?.collision;
 
         public static NetworkManager Network => Instance?.network;
         public static ObjectManager Object => Instance?.@object;
+        #endregion
+
+        #region Core
+        private ResourceManager resource = new ResourceManager();
+
+        public static ResourceManager Resource => Instance?.resource;
         #endregion
 
         #region Unity 이벤트 함수
