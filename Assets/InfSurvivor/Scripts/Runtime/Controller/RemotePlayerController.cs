@@ -12,7 +12,7 @@ namespace InfSurvivor.Runtime.Controller
     
         public override void InitPos(PositionInfo posInfo)
         {
-            transform.position = TargetMovePosition = posInfo.Pos.ToUnityVector3();
+            transform.position = LogicalPos = posInfo.Pos.ToUnityVector3();
             LastVelocity = posInfo.Velocity.ToUnityVector3();
             LastFacingDir = posInfo.FacingDir.ToUnityVector2();
             lastFirePressed = posInfo.FirePressed;
@@ -22,16 +22,15 @@ namespace InfSurvivor.Runtime.Controller
         
         protected override void Update()
         {
-            base.Update();
             float renderTime = Time.time - Managers.Network.GetDisplayPing();
             float elapsedTime = renderTime - lastPacketTime;
-            Vector2 predictedPos = TargetMovePosition + LastVelocity * elapsedTime;
+            Vector2 predictedPos = LogicalPos + LastVelocity * elapsedTime;
             transform.position = Vector3.Lerp(transform.position, predictedPos, 15f * Time.deltaTime);
         }
         
         public override void OnUpdateMoveState(S_Move move)
         {
-            TargetMovePosition = move.PosInfo.Pos.ToUnityVector2();
+            LogicalPos = move.PosInfo.Pos.ToUnityVector2();
             LastVelocity = move.PosInfo.Velocity.ToUnityVector2();
             LastFacingDir = move.PosInfo.FacingDir.ToUnityVector2();
             lastPacketTime = Time.time;
@@ -50,9 +49,9 @@ namespace InfSurvivor.Runtime.Controller
             
             AnimationSetFloat(ANIM_FLOAT_SPEED, LastVelocity.sqrMagnitude);
     
-            if ((TargetMovePosition - (Vector2)transform.position).sqrMagnitude > 2f * 2f)
+            if ((LogicalPos - (Vector2)transform.position).sqrMagnitude > 2f * 2f)
             {
-                transform.position = TargetMovePosition;
+                transform.position = LogicalPos;
             }
         }
     }

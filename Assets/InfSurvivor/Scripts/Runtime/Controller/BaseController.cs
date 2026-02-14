@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using InfSurvivor.Runtime.Manager;
 using InfSurvivor.Runtime.Utils;
+using Shared.FSM;
 using Shared.Packet;
 using Shared.Packet.Struct;
 using Shared.Physics.Collider;
@@ -24,13 +25,22 @@ namespace InfSurvivor.Runtime.Controller
         #endregion
 
         public Vector2 LastVelocity { get; protected set; }
-        public Vector2 TargetMovePosition { get; protected set; }
+        /// <summary>
+        /// 실제 로직 처리에 사용되는 위치
+        /// </summary>
+        /// <value></value>
+        public Vector2 LogicalPos { get; protected set; }
         public virtual ColliderBase BodyCollider { get; }
+        public virtual StateMachine StateMachine { get; }
         protected HashSet<CVector2Int> occupiedCells = new HashSet<CVector2Int>();
 
         #region Unity Events
         protected virtual void Awake() { }
-        protected virtual void Start() { }
+        protected virtual void Start()
+        {
+            CreateBodyCollider();
+            CreateStateMachine();
+        }
         protected virtual void OnEnable() { }
         protected virtual void OnDisable()
         {
@@ -40,18 +50,31 @@ namespace InfSurvivor.Runtime.Controller
                 Managers.Collision?.RemoveFromCells(occupiedCells, BodyCollider);
             }
         }
-        protected virtual void Update() { }
+        protected virtual void Update()
+        {
+            SyncTransform();
+            StateMachine?.Update();
+        }
+
         protected virtual void FixedUpdate()
         {
             if (BodyCollider != null)
             {
-                BodyCollider.UpdatePosition(TargetMovePosition.ToCVector2());
+                BodyCollider.UpdatePosition(LogicalPos.ToCVector2());
                 Managers.Collision.UpdateOccupiedCells(BodyCollider, occupiedCells);
             }
+            BeforeUpdateLogicalPosition();
+            UpdateLogicalPosition();
+            StateMachine?.FixedUpdate();
         }
         #endregion
 
         public abstract void InitPos(PositionInfo posInfo);
+        protected virtual void CreateBodyCollider() { }
+        protected virtual void CreateStateMachine() { }
+        protected virtual void SyncTransform() { }
+        protected virtual void BeforeUpdateLogicalPosition() {}
+        protected virtual void UpdateLogicalPosition() { }
         public virtual void ApplyFacingDirection(Vector2 dir) { }
 
         #region Collider Trigger

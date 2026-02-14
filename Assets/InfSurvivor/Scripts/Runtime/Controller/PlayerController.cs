@@ -42,7 +42,7 @@ namespace InfSurvivor.Runtime.Controller
         protected override void Start()
         {
             base.Start();
-            MoveSpeed = 5f;
+            MoveSpeed = 10f;
         }
         #endregion
 

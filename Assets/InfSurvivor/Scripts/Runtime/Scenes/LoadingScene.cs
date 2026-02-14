@@ -9,6 +9,7 @@ namespace InfSurvivor.Runtime.Scenes
     using static Defines;
     public class LoadingScene : BaseScene
     {
+        public float fakeLoadingTime = 2f;
         public override Defines.SceneType SceneType => Defines.SceneType.LoadingScene;
         // TODO: 리소스 로딩 방식으로 변경
         [SerializeField] private LoadingPopup loadingPopup;
@@ -33,12 +34,12 @@ namespace InfSurvivor.Runtime.Scenes
             AsyncOperation operation = SceneManager.LoadSceneAsync(Managers.Scene.GetSceneName(SceneType.BattleScene));
             operation.allowSceneActivation = false;
 
-            float fakeLoadingTime = 2f;
+            float fakeTime = this.fakeLoadingTime;
 
-            while (fakeLoadingTime > 0f)
+            while (fakeTime > 0f)
             {
-                fakeLoadingTime -= Time.deltaTime;
-                loadingPopup.SetProgressbarValue(1f - fakeLoadingTime/2f);
+                fakeTime -= Time.deltaTime;
+                loadingPopup.SetProgressbarValue(1f - fakeTime/2f);
                 yield return null;
             }
 

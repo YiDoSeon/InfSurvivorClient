@@ -23,13 +23,17 @@ namespace InfSurvivor.Runtime.Controller
         public uint meleeAttackSeq = 0;
         private List<PendingMove> pendingMoves = new List<PendingMove>();
 
-        private StateMachine<LocalPlayerController, PlayerState> stateMachine;
         public PlayerInputHandler InputHandler { get; private set; }
         public PlayerAnimationEvents AnimationEvents { get; private set; }
+
         private CBoxCollider bodyCollider;
         public override ColliderBase BodyCollider => bodyCollider;
         public CCircleCollider MeleeAttackCollider { get; private set; }
 
+        private StateMachine<LocalPlayerController, PlayerState> stateMachine;
+        public override StateMachine StateMachine => stateMachine;
+
+        #region Unity Events
         protected override void Awake()
         {
             base.Awake();
@@ -40,24 +44,8 @@ namespace InfSurvivor.Runtime.Controller
         protected override void Start()
         {
             base.Start();
-            // TODO: 데이터 로드 방식으로 변경
-            bodyCollider = new CBoxCollider(
-                this,
-                new CVector2(0f, 0.5f),
-                TargetMovePosition.ToCVector2(),
-                new CVector2(0.6f, 1f));
-            bodyCollider.Layer = CollisionLayer.Player;
-            Managers.Collision.RegisterCollider(bodyCollider);
-
-            MeleeAttackCollider = new CCircleCollider(
-                this,
-                new CVector2(0f, 0.5f),
-                TargetMovePosition.ToCVector2(),
-                0.75f);
-            Managers.Collision.RegisterCollider(MeleeAttackCollider);
 
             AnimationEvents.SetPlayer(this);
-            CreateStateMachine();
             StartCoroutine(CoSyncMovement());
         }
 
@@ -70,8 +58,29 @@ namespace InfSurvivor.Runtime.Controller
             }
             base.OnDisable();
         }
+        #endregion
 
-        private void CreateStateMachine()
+        #region BasePlayer Implements
+        protected override void CreateBodyCollider()
+        {
+            // TODO: 데이터 로드 방식으로 변경
+            bodyCollider = new CBoxCollider(
+                this,
+                new CVector2(0f, 0.5f),
+                LogicalPos.ToCVector2(),
+                new CVector2(0.6f, 1f));
+            bodyCollider.Layer = CollisionLayer.Player;
+            Managers.Collision.RegisterCollider(bodyCollider);
+
+            MeleeAttackCollider = new CCircleCollider(
+                this,
+                new CVector2(0f, 0.5f),
+                LogicalPos.ToCVector2(),
+                0.75f);
+            Managers.Collision.RegisterCollider(MeleeAttackCollider);
+        }
+
+        protected override void CreateStateMachine()
         {
             stateMachine = new StateMachine<LocalPlayerController, PlayerState>(this);
             stateMachine.AddState(PlayerState.Idle, new PlayerIdleState(this, stateMachine));
@@ -82,11 +91,41 @@ namespace InfSurvivor.Runtime.Controller
 
         public override void InitPos(PositionInfo posInfo)
         {
-            transform.position = TargetMovePosition = posInfo.Pos.ToUnityVector3();
+            transform.position = LogicalPos = posInfo.Pos.ToUnityVector3();
             ApplyFacingDirection(posInfo.FacingDir.ToUnityVector2());
             AnimationSetFloat(ANIM_FLOAT_SPEED, 0f);
         }
 
+        protected override void SyncTransform()
+        {
+            AnimationSetFloat(ANIM_FLOAT_SPEED, LastVelocity.sqrMagnitude);
+
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                LogicalPos,
+                MoveSpeed * Time.deltaTime
+            );
+        }
+
+        protected override void BeforeUpdateLogicalPosition()
+        {
+            if (needsSyncMove)
+            {
+                SendMovePacket();
+            }
+            else
+            {
+                CreatePendingMove(false);
+            }
+        }
+
+        protected override void UpdateLogicalPosition()
+        {
+            LogicalPos += LastVelocity * Time.fixedDeltaTime;
+        }
+        #endregion
+
+        #region Movement
         public void SetDirtySyncMove()
         {
             needsSyncMove = true;
@@ -102,44 +141,6 @@ namespace InfSurvivor.Runtime.Controller
             {
                 LastVelocity = Vector2.zero;
             }
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-            UpdateMovement();
-            stateMachine.Update();
-        }
-
-        public void UpdateMovement()
-        {
-            AnimationSetFloat(ANIM_FLOAT_SPEED, LastVelocity.sqrMagnitude);
-
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                TargetMovePosition,
-                MoveSpeed * Time.deltaTime
-            );
-        }
-
-        protected override void FixedUpdate()
-        {
-            base.FixedUpdate();
-            if (needsSyncMove)
-            {
-                SendMovePacket();
-            }
-            else
-            {
-                CreatePendingMove(false);
-            }
-            UpdateTargetPosition();
-            stateMachine.FixedUpdate();
-        }
-
-        public void UpdateTargetPosition()
-        {
-            TargetMovePosition += LastVelocity * Time.fixedDeltaTime;
         }
 
         private void SendMovePacket()
@@ -158,7 +159,7 @@ namespace InfSurvivor.Runtime.Controller
                     SeqNumber = seqNum,
                     PosInfo = new PositionInfo()
                     {
-                        Pos = TargetMovePosition.ToCVector2(),
+                        Pos = LogicalPos.ToCVector2(),
                         Velocity = LastVelocity.ToCVector2(),
                         FacingDir = LastFacingDir.ToCVector2(),
                         FirePressed = InputHandler.FirePressed,
@@ -177,19 +178,19 @@ namespace InfSurvivor.Runtime.Controller
 
         public override void OnUpdateMoveState(S_Move move)
         {
-            float before = TargetMovePosition.sqrMagnitude;
+            float before = LogicalPos.sqrMagnitude;
             pendingMoves.RemoveAll(m =>
             {
                 return move.SeqNumber.IsAfterOrEqual(m.seqNumber);
             });
 
-            TargetMovePosition = move.PosInfo.Pos.ToUnityVector2();
+            LogicalPos = move.PosInfo.Pos.ToUnityVector2();
 
             foreach (var m in pendingMoves)
             {
-                TargetMovePosition += m.velocity * Time.fixedDeltaTime;
+                LogicalPos += m.velocity * Time.fixedDeltaTime;
             }
-            float after = TargetMovePosition.sqrMagnitude;
+            float after = LogicalPos.sqrMagnitude;
             if (before - after > 0.01f)
             {
                 Debug.Log("튐");
@@ -206,10 +207,12 @@ namespace InfSurvivor.Runtime.Controller
             }
         }
 
+        #endregion
+
         #region MeleeAttack
         public void CheckMeleeAttack()
         {
-            MeleeAttackCollider.Position = TargetMovePosition.ToCVector2() + Dir4.ToCVector2() * 0.8f;
+            MeleeAttackCollider.Position = LogicalPos.ToCVector2() + Dir4.ToCVector2() * 0.8f;
 
             List<ColliderBase> colliders = Managers.Collision.GetOverlappedColliders(
                 MeleeAttackCollider,
@@ -225,16 +228,12 @@ namespace InfSurvivor.Runtime.Controller
         }
         public void SendMeleeAttackPacket()
         {
-            C_MeleeAttack meleeAttackPacket = new C_MeleeAttack()
-            {
-                SeqNumber = meleeAttackSeq++
-            };
+            C_MeleeAttack meleeAttackPacket = new C_MeleeAttack();
             Managers.Network.Send(meleeAttackPacket);
         }
 
         public void OnMeleeAttackConfirm(S_MeleeAttack meleeAttack)
         {
-            bool byLocalPlayer = meleeAttack.AttackerId == Id;
             foreach (DamagedElement target in meleeAttack.Targets)
             {
                 EnemyController ec = Managers.Object.FindEnemyById(target.EnemyId);
@@ -242,8 +241,7 @@ namespace InfSurvivor.Runtime.Controller
                 {
                     continue;
                 }
-                //Debug.Log($"{ec.name} - {target.FinalPos}");
-                ec.OnReceiveDamaged(target.FinalPos, meleeAttack.SeqNumber, byLocalPlayer);
+                ec.OnSyncDamagedState(target.Pos, target.Velocity);
             }
         }
         #endregion

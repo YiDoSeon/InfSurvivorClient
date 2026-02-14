@@ -545,6 +545,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7697080016291ae43a6abaa5cf612d4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: InfSurvivor.Runtime::InfSurvivor.Runtime.LoadingScene
+  fakeLoadingTime: 0
   loadingPopup: {fileID: 1327219150}
 --- !u!1 &1974791275
 GameObject:

@@ -11,37 +11,48 @@ namespace InfSurvivor.Runtime.Controller
 {
     public class EnemyController : BaseController
     {
-        private CCircleCollider circleCollider;
-        public override ColliderBase BodyCollider => circleCollider;
         private new SpriteRenderer renderer;
         private MaterialPropertyBlock propBlock;
+
+        private CCircleCollider circleCollider;
+        public override ColliderBase BodyCollider => circleCollider;
+
         private StateMachine<EnemyController, EnemyState> stateMachine;
-        public Vector2 KnockBackDir { get; private set; }
-        private float knockBackSpeed = 5f;
-    
+        public override StateMachine StateMachine => stateMachine;
+        public float KnockBackSpeed { get; private set; } = 10f;
+        public float KnockBackTime { get; private set; } = 0.1f;
+        public Vector2 PredictedLogicalPos { get; set; }
+
+        #region Unity Events    
         protected override void Awake()
         {
             base.Awake();
             renderer = GetComponent<SpriteRenderer>();
             propBlock = new MaterialPropertyBlock();
         }
-    
+
         protected override void Start()
         {
             base.Start();
+
+            MoveSpeed = 3f;
+        }
+        #endregion
+
+        #region BasePlayer Implements
+
+        protected override void CreateBodyCollider()
+        {
             circleCollider = new CCircleCollider(
                 this,
                 CVector2.zero,
-                TargetMovePosition.ToCVector2(),
+                LogicalPos.ToCVector2(),
                 0.5f);
             circleCollider.Layer = CollisionLayer.Monster;
             Managers.Collision.RegisterCollider(circleCollider);
-    
-            MoveSpeed = 3f;
-            CreateStateMachine();
         }
     
-        private void CreateStateMachine()
+        protected override void CreateStateMachine()
         {
             stateMachine = new StateMachine<EnemyController, EnemyState>(this);
             stateMachine.AddState(EnemyState.Idle, new EnemyIdleState(this, stateMachine));
@@ -52,50 +63,46 @@ namespace InfSurvivor.Runtime.Controller
     
         public override void InitPos(PositionInfo posInfo)
         {
-            transform.position = TargetMovePosition = posInfo.Pos.ToUnityVector2();
+            transform.position = LogicalPos = PredictedLogicalPos = posInfo.Pos.ToUnityVector2();
         }
-    
-        protected override void Update()
+
+        protected override void SyncTransform()
         {
-            base.Update();
-            float speed = 0f;
+            float speed = 1f;
             if (stateMachine.CurrentStateId == EnemyState.Damaged)
             {
-                speed = knockBackSpeed;
+                speed = KnockBackSpeed;
             }
             else if (stateMachine.CurrentStateId == EnemyState.Move)
             {
                 speed = MoveSpeed;
             }
+            SyncTransform(speed);
+        }
+
+        public void SyncTransform(float speed)
+        {
             transform.position = Vector3.MoveTowards(
                 transform.position,
-                TargetMovePosition,
+                LogicalPos,
                 speed * Time.deltaTime
             );
-    
-            stateMachine.Update();
         }
-    
-        protected override void FixedUpdate()
+
+        protected override void UpdateLogicalPosition()
         {
-            base.FixedUpdate();
             float speed = 0f;
             if (stateMachine.CurrentStateId == EnemyState.Damaged)
             {
-                speed = knockBackSpeed;
+                speed = KnockBackSpeed;
             }
             else if (stateMachine.CurrentStateId == EnemyState.Move)
             {
                 speed = MoveSpeed;
             }
-            TargetMovePosition += LastVelocity * speed * Time.deltaTime;
-            stateMachine.FixedUpdate();
+            LogicalPos = Vector2.MoveTowards(LogicalPos, PredictedLogicalPos, speed * Time.fixedDeltaTime);
         }
-    
-        public void SetVelocity(Vector2 velocity)
-        {
-            LastVelocity = velocity;
-        }
+        #endregion
     
         public void SetFlash(float amount)
         {
@@ -103,62 +110,37 @@ namespace InfSurvivor.Runtime.Controller
             propBlock.SetFloat("_FlashAmount", amount);
             renderer.SetPropertyBlock(propBlock);
         }
-    
+
         public void OnDamaged(BaseController sender)
         {
             if (sender is LocalPlayerController player)
             {
-                KnockBackDir = player.LastFacingDir;
-                //Debug.Log(KnockBackDir);
+                LastVelocity += player.LastFacingDir;
             }
-            //Debug.Log(gameObject.name);
+            
             stateMachine.ChangeState(EnemyState.Damaged);
+            SetPredictedLogicalPos(LogicalPos + LastVelocity.normalized * KnockBackSpeed * KnockBackTime);
         }
-    
-        // TODO: 네트워크 레이어 분리 작업?
-        private uint lastProcessedSeq = 0;
-        public bool IsConfirmed { get; set; }
-    
-        public void OnReceiveDamaged(CVector2 finalPos, uint seq, bool byLocalPlayer)
+
+        public void OnSyncDamagedState(CVector2 pos, CVector2 velocity)
         {
-            if (byLocalPlayer)
-            {
-                bool isAfter = seq.IsAfter(lastProcessedSeq);
-                bool isSame = seq.IsSame(lastProcessedSeq);
-    
-                if (isAfter == false && isSame == false)
-                {
-                    return;
-                }
-    
-                if (isSame)
-                {
-                    TargetMovePosition = finalPos.ToUnityVector2();
-                    IsConfirmed = true;
-                    return;
-                }
-                
-                lastProcessedSeq = seq;
-            }
-    
-            TargetMovePosition = finalPos.ToUnityVector2();
-            IsConfirmed = true;
-    
-            if (stateMachine.CurrentState is EnemyDamagedState damagedState)
-            {
-                damagedState.ResetDuration();
-            }
-            else
-            {
-                stateMachine.ChangeState(EnemyState.Damaged);            
-            }
+            LastVelocity = velocity.ToUnityVector2();
+
+            stateMachine.ChangeState(EnemyState.Damaged);
+            SetPredictedLogicalPos(pos.ToUnityVector2());
         }
-    
-        public void KnockBack()
+
+        private void SetPredictedLogicalPos(Vector2 pos)
         {
-            TargetMovePosition += KnockBackDir.normalized * knockBackSpeed * Time.fixedDeltaTime;
+            PredictedLogicalPos = pos;
+            Debug.Log(PredictedLogicalPos);
         }
-    
+
+        public void ResetKnockBackDir()
+        {
+            LastVelocity = Vector2.zero;
+        }
+
         private void OnDrawGizmos()
         {
             if (Application.isPlaying == false)
